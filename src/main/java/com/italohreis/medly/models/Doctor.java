@@ -6,6 +6,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.util.List;
 import java.util.UUID;
 
 @NoArgsConstructor
@@ -21,6 +22,14 @@ public class Doctor {
     private UUID id;
 
     private String name;
+    private String crm;
+    private String specialty;
 
+    @OneToOne
+    @JoinColumn(name = "user_id")
+    private User user;
+
+    @OneToMany(mappedBy = "doctor", cascade = CascadeType.ALL)
+    private List<Appointment> appointments;
 
 }

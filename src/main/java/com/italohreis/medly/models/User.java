@@ -28,5 +28,8 @@ public class User {
     private Role role;
 
     @OneToOne(mappedBy = "user", cascade = CascadeType.ALL)
+    private Doctor doctor;
+
+    @OneToOne(mappedBy = "user", cascade = CascadeType.ALL)
     private Patient patient;
 }
