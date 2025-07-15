@@ -5,11 +5,12 @@ import com.italohreis.medly.dtos.auth.DoctorRegisterDTO;
 import com.italohreis.medly.enums.Role;
 import com.italohreis.medly.dtos.auth.AuthResponseDTO;
 import com.italohreis.medly.dtos.auth.PatientRegisterDTO;
+import com.italohreis.medly.exceptions.EmailAlreadyExistsException;
+import com.italohreis.medly.exceptions.InvalidCredentialsException;
+import com.italohreis.medly.exceptions.UserNotFoundException;
 import com.italohreis.medly.models.Doctor;
 import com.italohreis.medly.models.Patient;
 import com.italohreis.medly.models.User;
-import com.italohreis.medly.repositories.DoctorRepository;
-import com.italohreis.medly.repositories.PatientRepository;
 import com.italohreis.medly.repositories.UserRepository;
 import com.italohreis.medly.security.JwtTokenProvider;
 import jakarta.transaction.Transactional;
@@ -81,10 +82,10 @@ public class AuthService {
 
     public AuthResponseDTO login(AuthRequestDTO authRequestDTO) {
         User user = userRepository.findByEmail(authRequestDTO.email())
-                .orElseThrow(() -> new RuntimeException("User not found"));
+                .orElseThrow(() -> new UserNotFoundException(authRequestDTO.email()));
 
         if (!passwordEncoder.matches(authRequestDTO.password(), user.getPassword())) {
-            throw new RuntimeException("Invalid credentials");
+            throw new InvalidCredentialsException();
         }
 
         String token = jwtTokenProvider.generateToken(user);
@@ -93,7 +94,7 @@ public class AuthService {
 
     private void checkIfEmailExists(String email) {
         if (userRepository.findByEmail(email).isPresent()) {
-            throw new RuntimeException("Email already in use");
+            throw new EmailAlreadyExistsException(email);
         }
     }
 
