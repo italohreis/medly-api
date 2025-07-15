@@ -20,35 +20,35 @@ import org.springframework.stereotype.Service;
 @Service
 public class AuthService {
     private final UserRepository userRepository;
-    private final PatientRepository patientRepository;
-    private final DoctorRepository doctorRepository;
     private final PasswordEncoder passwordEncoder;
     private final JwtTokenProvider jwtTokenProvider;
 
     @Autowired
-    public AuthService(UserRepository userRepository, PatientRepository patientRepository, DoctorRepository doctorRepository, PasswordEncoder passwordEncoder, JwtTokenProvider jwtTokenProvider) {
+    public AuthService(UserRepository userRepository, PasswordEncoder passwordEncoder, JwtTokenProvider jwtTokenProvider) {
         this.userRepository = userRepository;
-        this.patientRepository = patientRepository;
-        this.doctorRepository = doctorRepository;
         this.passwordEncoder = passwordEncoder;
         this.jwtTokenProvider = jwtTokenProvider;
     }
 
     @Transactional
     public AuthResponseDTO registerPatient(PatientRegisterDTO patientRegisterDTO) {
+        checkIfEmailExists(patientRegisterDTO.email());
+
         User user = new User();
         user.setName(patientRegisterDTO.name());
         user.setEmail(patientRegisterDTO.email());
         user.setPassword(passwordEncoder.encode(patientRegisterDTO.password()));
         user.setRole(Role.PATIENT);
-        userRepository.save(user);
 
         Patient patient = new Patient();
         patient.setName(patientRegisterDTO.name());
         patient.setCpf(patientRegisterDTO.cpf());
         patient.setBirthDate(patientRegisterDTO.birthDate());
+
+        user.setPatient(patient);
         patient.setUser(user);
-        patientRepository.save(patient);
+
+        userRepository.save(user);
 
         String token = jwtTokenProvider.generateToken(user);
 
@@ -57,19 +57,23 @@ public class AuthService {
 
     @Transactional
     public AuthResponseDTO registerDoctor(DoctorRegisterDTO doctorRegisterDTO) {
+        checkIfEmailExists(doctorRegisterDTO.email());
+
         User user = new User();
         user.setName(doctorRegisterDTO.name());
         user.setEmail(doctorRegisterDTO.email());
         user.setPassword(passwordEncoder.encode(doctorRegisterDTO.password()));
         user.setRole(Role.DOCTOR);
-        userRepository.save(user);
 
         Doctor doctor = new Doctor();
         doctor.setName(doctorRegisterDTO.name());
         doctor.setCrm(doctorRegisterDTO.crm());
         doctor.setSpecialty(doctorRegisterDTO.specialty());
+
+        user.setDoctor(doctor);
         doctor.setUser(user);
-        doctorRepository.save(doctor);
+
+        userRepository.save(user);
 
         String token = jwtTokenProvider.generateToken(user);
         return new AuthResponseDTO(token, user.getRole().name());
@@ -86,4 +90,11 @@ public class AuthService {
         String token = jwtTokenProvider.generateToken(user);
         return new AuthResponseDTO(token, user.getRole().name());
     }
+
+    private void checkIfEmailExists(String email) {
+        if (userRepository.findByEmail(email).isPresent()) {
+            throw new RuntimeException("Email already in use");
+        }
+    }
+
 }
