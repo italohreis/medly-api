@@ -7,7 +7,6 @@ import com.italohreis.medly.dtos.auth.PatientRegisterDTO;
 import com.italohreis.medly.services.AuthService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
