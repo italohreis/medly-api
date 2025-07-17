@@ -31,12 +31,27 @@ public class AvailabilityService {
             throw new BusinessRuleException("Start time must be before end time.");
         }
 
+        List<Availability> overlappingAvailabilities = availabilityRepository.findOverlappingAvailabilities(
+                doctor.getId(), availability.getStartTime(), availability.getEndTime());
+
+        if (!overlappingAvailabilities.isEmpty()) {
+            throw new BusinessRuleException("Availability overlaps with existing availabilities.");
+        }
+
         availability.setDoctor(doctor);
         Availability savedAvailability = availabilityRepository.save(availability);
         return availabilityMapper.toDto(savedAvailability);
     }
 
     public List<Availability> getAvailabilitiesByDoctorId(UUID doctorId) {
-        return availabilityRepository.findByDoctorId(doctorId);
+        if (!doctorRepository.existsById(doctorId)) {
+            throw new ResourceNotFoundException("Doctor", "id", doctorId);
+        }
+
+        List<Availability> availabilities = availabilityRepository.findByDoctorId(doctorId);
+        if (availabilities.isEmpty()) {
+            throw new ResourceNotFoundException("Availability", "doctorId", doctorId);
+        }
+        return availabilities;
     }
 }

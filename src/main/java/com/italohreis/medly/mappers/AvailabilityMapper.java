@@ -16,6 +16,7 @@ public interface AvailabilityMapper {
     Availability toModel(AvailabilityRequestDTO dto);
 
     @Mapping(target="doctorId", source="doctor.id")
+    @Mapping(target = "doctorName", source = "doctor.name")
     AvailabilityResponseDTO toDto(Availability availability);
 
     default Doctor mapDoctorIdToDoctor(UUID doctorId) {
