@@ -1,6 +1,7 @@
 package com.italohreis.medly.infra;
 
 import com.italohreis.medly.exceptions.*;
+import org.apache.coyote.Response;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
@@ -53,5 +54,11 @@ public class RestExceptionHandler extends ResponseEntityExceptionHandler {
     public ResponseEntity<RestErrorMessage> handleBusinessRuleException(BusinessRuleException ex) {
         RestErrorMessage errorMessage = new RestErrorMessage(HttpStatus.BAD_REQUEST, ex.getMessage());
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorMessage);
+    }
+
+    @ExceptionHandler(ForbiddenException.class)
+    public ResponseEntity<RestErrorMessage> handleForbiddenException(ForbiddenException ex) {
+        RestErrorMessage errorMessage = new RestErrorMessage(HttpStatus.FORBIDDEN, ex.getMessage());
+        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(errorMessage);
     }
 }
