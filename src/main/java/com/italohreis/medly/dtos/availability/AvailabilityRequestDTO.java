@@ -1,4 +1,4 @@
-package com.italohreis.medly.dtos.Availability;
+package com.italohreis.medly.dtos.availability;
 
 import jakarta.validation.constraints.NotNull;
 

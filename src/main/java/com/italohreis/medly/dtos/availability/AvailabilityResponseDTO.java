@@ -1,4 +1,4 @@
-package com.italohreis.medly.dtos.Availability;
+package com.italohreis.medly.dtos.availability;
 
 import java.time.LocalDateTime;
 import java.util.UUID;
@@ -8,5 +8,5 @@ public record AvailabilityResponseDTO(
     UUID doctorId,
     LocalDateTime startTime,
     LocalDateTime endTime,
-    boolean isAvailable
+    Boolean isAvailable
 ) {}
