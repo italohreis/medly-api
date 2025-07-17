@@ -1,6 +1,8 @@
 package com.italohreis.medly.services;
 
 import com.italohreis.medly.dtos.availability.AvailabilityResponseDTO;
+import com.italohreis.medly.exceptions.BusinessRuleException;
+import com.italohreis.medly.exceptions.ResourceNotFoundException;
 import com.italohreis.medly.mappers.AvailabilityMapper;
 import com.italohreis.medly.models.Availability;
 import com.italohreis.medly.models.Doctor;
@@ -23,10 +25,10 @@ public class AvailabilityService {
     @Transactional
     public AvailabilityResponseDTO createAvailability(Availability availability) {
         Doctor doctor = doctorRepository.findById(availability.getDoctor().getId())
-                .orElseThrow(() -> new IllegalArgumentException("Doctor not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Doctor", "id", availability.getDoctor().getId()));
 
         if (availability.getStartTime().isAfter(availability.getEndTime())) {
-            throw new IllegalArgumentException("Start time must be before end time");
+            throw new BusinessRuleException("Start time must be before end time.");
         }
 
         availability.setDoctor(doctor);

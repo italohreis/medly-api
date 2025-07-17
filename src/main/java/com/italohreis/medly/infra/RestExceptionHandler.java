@@ -1,8 +1,6 @@
 package com.italohreis.medly.infra;
 
-import com.italohreis.medly.exceptions.EmailAlreadyExistsException;
-import com.italohreis.medly.exceptions.InvalidCredentialsException;
-import com.italohreis.medly.exceptions.UserNotFoundException;
+import com.italohreis.medly.exceptions.*;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
@@ -39,15 +37,21 @@ public class RestExceptionHandler extends ResponseEntityExceptionHandler {
         return ResponseEntity.status(HttpStatus.CONFLICT).body(errorMessage);
     }
 
-    @ExceptionHandler(UserNotFoundException.class)
-    public ResponseEntity<RestErrorMessage> handleUserNotFound(UserNotFoundException ex) {
-        RestErrorMessage errorMessage = new RestErrorMessage(HttpStatus.NOT_FOUND, ex.getMessage());
-        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(errorMessage);
-    }
-
     @ExceptionHandler(InvalidCredentialsException.class)
     public ResponseEntity<RestErrorMessage> handleInvalidCredentials(InvalidCredentialsException ex) {
         RestErrorMessage errorMessage = new RestErrorMessage(HttpStatus.UNAUTHORIZED, ex.getMessage());
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(errorMessage);
+    }
+
+    @ExceptionHandler(ResourceNotFoundException.class)
+    public ResponseEntity<RestErrorMessage> handleResourceNotFound(ResourceNotFoundException ex) {
+        RestErrorMessage errorMessage = new RestErrorMessage(HttpStatus.NOT_FOUND, ex.getMessage());
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(errorMessage);
+    }
+
+    @ExceptionHandler(BusinessRuleException.class)
+    public ResponseEntity<RestErrorMessage> handleBusinessRuleException(BusinessRuleException ex) {
+        RestErrorMessage errorMessage = new RestErrorMessage(HttpStatus.BAD_REQUEST, ex.getMessage());
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorMessage);
     }
 }

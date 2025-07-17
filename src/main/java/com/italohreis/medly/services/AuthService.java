@@ -7,7 +7,7 @@ import com.italohreis.medly.dtos.auth.AuthResponseDTO;
 import com.italohreis.medly.dtos.auth.PatientRegisterDTO;
 import com.italohreis.medly.exceptions.EmailAlreadyExistsException;
 import com.italohreis.medly.exceptions.InvalidCredentialsException;
-import com.italohreis.medly.exceptions.UserNotFoundException;
+import com.italohreis.medly.exceptions.ResourceNotFoundException;
 import com.italohreis.medly.models.Doctor;
 import com.italohreis.medly.models.Patient;
 import com.italohreis.medly.models.User;
@@ -76,7 +76,7 @@ public class AuthService {
 
     public AuthResponseDTO login(AuthRequestDTO authRequestDTO) {
         User user = userRepository.findByEmail(authRequestDTO.email())
-                .orElseThrow(() -> new UserNotFoundException(authRequestDTO.email()));
+                .orElseThrow(() -> new ResourceNotFoundException("User", "email", authRequestDTO.email()));
 
         if (!passwordEncoder.matches(authRequestDTO.password(), user.getPassword())) {
             throw new InvalidCredentialsException();
