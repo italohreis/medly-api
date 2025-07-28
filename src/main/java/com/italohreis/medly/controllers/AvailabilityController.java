@@ -9,6 +9,8 @@ import com.italohreis.medly.models.User;
 import com.italohreis.medly.services.AvailabilityService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
@@ -34,19 +36,16 @@ public class AvailabilityController {
     }
 
     @GetMapping
-    public ResponseEntity<?> getAvailabilitiesByDoctorId(
+    public ResponseEntity<Page<AvailabilityResponseDTO>> getAvailabilitiesByDoctorId(
             @RequestParam("doctorId") UUID doctorId,
+            Pageable pageable,
             Authentication authentication) {
 
         checkOwnership(authentication, doctorId);
 
-        List<Availability> availabilities = availabilityService.getAvailabilitiesByDoctorId(doctorId);
+        Page<AvailabilityResponseDTO> availabilitiesPage = availabilityService.getAvailabilitiesByDoctorId(doctorId, pageable);
 
-        List<AvailabilityResponseDTO> responseDTOs = availabilities.stream()
-                .map(availabilityMapper::toDto)
-                .toList();
-
-        return ResponseEntity.ok(responseDTOs);
+        return ResponseEntity.ok(availabilitiesPage);
     }
 
     private void checkOwnership(Authentication authentication, UUID requestedDoctorId) {

@@ -3,5 +3,5 @@ CREATE TABLE availability (
     doctor_id UUID NOT NULL REFERENCES doctor(id),
     start_time TIMESTAMP NOT NULL,
     end_time TIMESTAMP NOT NULL,
-    is_available BOOLEAN NOT NULL DEFAULT TRUE,
+    is_available BOOLEAN NOT NULL DEFAULT TRUE
 );
