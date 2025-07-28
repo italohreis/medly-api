@@ -11,11 +11,11 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
 import java.util.UUID;
 
 @RestController
@@ -32,7 +32,8 @@ public class AvailabilityController {
 
         checkOwnership(authentication, availabilityRequestDTO.doctorId());
         Availability availability = availabilityMapper.toModel(availabilityRequestDTO);
-        return ResponseEntity.ok(availabilityService.createAvailability(availability));
+        return ResponseEntity.status(HttpStatus.CREATED).body(
+                availabilityService.createAvailability(availability));
     }
 
     @GetMapping

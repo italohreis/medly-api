@@ -1,6 +1,6 @@
 CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 
-CREATE TABLE "user" (
+CREATE TABLE "users" (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     name VARCHAR(255),
     email VARCHAR(255) UNIQUE NOT NULL,
@@ -11,7 +11,7 @@ CREATE TABLE "user" (
 CREATE TABLE doctor (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     name VARCHAR(255),
-    user_id UUID UNIQUE REFERENCES "user"(id)
+    user_id UUID UNIQUE REFERENCES "users"(id)
 );
 
 CREATE TABLE patient (
@@ -19,7 +19,7 @@ CREATE TABLE patient (
     name VARCHAR(255),
     cpf VARCHAR(20),
     birth_date DATE,
-    user_id UUID UNIQUE REFERENCES "user"(id),
+    user_id UUID UNIQUE REFERENCES "users"(id),
     doctor_id UUID UNIQUE REFERENCES doctor(id)
 );
 
