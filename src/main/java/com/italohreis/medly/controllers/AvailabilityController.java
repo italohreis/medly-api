@@ -46,7 +46,7 @@ public class AvailabilityController {
 
         Page<AvailabilityResponseDTO> availabilitiesPage = availabilityService.getAvailabilitiesByDoctorId(doctorId, pageable);
 
-        return ResponseEntity.ok(availabilitiesPage);
+        return ResponseEntity.status(HttpStatus.OK).body(availabilitiesPage);
     }
 
     private void checkOwnership(Authentication authentication, UUID requestedDoctorId) {
