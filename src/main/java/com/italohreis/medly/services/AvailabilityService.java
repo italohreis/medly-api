@@ -10,6 +10,8 @@ import com.italohreis.medly.repositories.AvailabilityRepository;
 import com.italohreis.medly.repositories.DoctorRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -43,15 +45,17 @@ public class AvailabilityService {
         return availabilityMapper.toDto(savedAvailability);
     }
 
-    public List<Availability> getAvailabilitiesByDoctorId(UUID doctorId) {
+    public Page<AvailabilityResponseDTO> getAvailabilitiesByDoctorId(UUID doctorId, Pageable pageable) {
         if (!doctorRepository.existsById(doctorId)) {
             throw new ResourceNotFoundException("Doctor", "id", doctorId);
         }
 
-        List<Availability> availabilities = availabilityRepository.findByDoctorId(doctorId);
-        if (availabilities.isEmpty()) {
-            throw new ResourceNotFoundException("Availability", "doctorId", doctorId);
+        Page<Availability> availabilityPage = availabilityRepository.findByDoctorId(doctorId, pageable);
+        if (availabilityPage.isEmpty()) {
+            throw new ResourceNotFoundException("Availabilities for doctor", "id", doctorId);
         }
-        return availabilities;
+
+        return availabilityPage.map(availabilityMapper::toDto);
+
     }
 }
