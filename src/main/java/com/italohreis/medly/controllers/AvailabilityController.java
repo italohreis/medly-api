@@ -26,14 +26,14 @@ public class AvailabilityController {
     private final AvailabilityMapper availabilityMapper;
 
     @PostMapping
-    public ResponseEntity<?> createAvailability(
+    public ResponseEntity<AvailabilityResponseDTO> createAvailability(
             @RequestBody @Valid AvailabilityRequestDTO availabilityRequestDTO,
             Authentication authentication) {
 
         checkOwnership(authentication, availabilityRequestDTO.doctorId());
-        Availability availability = availabilityMapper.toModel(availabilityRequestDTO);
         return ResponseEntity.status(HttpStatus.CREATED).body(
-                availabilityService.createAvailability(availability));
+                availabilityService.createAvailability(
+                        availabilityMapper.toModel(availabilityRequestDTO)));
     }
 
     @GetMapping
