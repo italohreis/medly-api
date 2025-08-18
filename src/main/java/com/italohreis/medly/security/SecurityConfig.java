@@ -42,7 +42,7 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.POST, "/auth/login").permitAll()
                         .requestMatchers(HttpMethod.POST, "/patients").permitAll()
                         .requestMatchers(HttpMethod.POST, "/doctors").hasRole("ADMIN")
-                        .requestMatchers("/availabilities/**").hasRole("DOCTOR")
+                        .requestMatchers("/availabilities/**").hasAnyRole("ADMIN", "DOCTOR")
                         .anyRequest().authenticated()
                 )
                 .addFilterBefore(securityFilter, UsernamePasswordAuthenticationFilter.class)
