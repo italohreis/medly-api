@@ -4,6 +4,7 @@ import com.italohreis.medly.dtos.doctor.DoctorRequestDTO;
 import com.italohreis.medly.dtos.doctor.DoctorResponseDTO;
 import com.italohreis.medly.dtos.doctor.DoctorUpdateDTO;
 import com.italohreis.medly.enums.Role;
+import com.italohreis.medly.exceptions.ResourceNotFoundException;
 import com.italohreis.medly.mappers.DoctorMapper;
 import com.italohreis.medly.models.Doctor;
 import com.italohreis.medly.models.User;
@@ -11,6 +12,7 @@ import com.italohreis.medly.repositories.DoctorRepository;
 import com.italohreis.medly.repositories.UserRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.flywaydb.core.internal.util.StringUtils;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -46,8 +48,28 @@ public class DoctorService {
         return doctorMapper.toDto(doctor);
     }
 
+    @Transactional
     public DoctorResponseDTO updateDoctor(UUID id, DoctorUpdateDTO doctorUpdateDTO) {
-        Optional<Doctor> doctor = doctorRepository.findById(id);
+        Doctor doctor = doctorRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Doctor", "id", id));
 
+        Optional<User> userOptional = userRepository.findById(doctor.getUser().getId());
+        if (userOptional.isEmpty()) {
+            throw new ResourceNotFoundException("User", "id", doctor.getUser().getId());
+        }
+
+        User user = userOptional.get();
+        if (StringUtils.hasText(doctorUpdateDTO.email()) && !doctorUpdateDTO.email().equalsIgnoreCase(user.getEmail())) {
+            userService.checkIfEmailExists(doctorUpdateDTO.email());
+            user.setEmail(doctorUpdateDTO.email());
+        }
+        if (StringUtils.hasText(doctorUpdateDTO.name())) {
+            user.setName(doctorUpdateDTO.name());
+        }
+
+        doctor.setSpecialty(doctorUpdateDTO.speciality() != null ? doctorUpdateDTO.speciality() : doctor.getSpecialty());
+
+        userRepository.save(user);
+        return doctorMapper.toDto(doctor);
     }
 }
