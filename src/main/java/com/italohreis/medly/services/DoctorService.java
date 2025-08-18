@@ -24,11 +24,12 @@ public class DoctorService {
     public DoctorResponseDTO createDoctor(DoctorRequestDTO doctorRequestDTO) {
         userService.checkIfEmailExists(doctorRequestDTO.email());
 
-        User user = new User();
-        user.setName(doctorRequestDTO.name());
-        user.setEmail(doctorRequestDTO.email());
-        user.setPassword(passwordEncoder.encode(doctorRequestDTO.password()));
-        user.setRole(Role.DOCTOR);
+        User user = userService.createUser(
+                doctorRequestDTO.name(),
+                doctorRequestDTO.email(),
+                doctorRequestDTO.password(),
+                Role.DOCTOR
+        );
 
         Doctor doctor = doctorMapper.toModel(doctorRequestDTO);
 
