@@ -58,6 +58,7 @@ public class PatientService {
 
         if (StringUtils.hasText(patientUpdateDTO.name())) {
             user.setName(patientUpdateDTO.name());
+            patient.setName(patientUpdateDTO.name());
         }
 
         if (StringUtils.hasText(patientUpdateDTO.email()) && !patientUpdateDTO.email().equalsIgnoreCase(user.getEmail())) {
@@ -69,8 +70,8 @@ public class PatientService {
             patient.setCpf(patientUpdateDTO.cpf());
         }
 
-        if (StringUtils.hasText(patientUpdateDTO.birthDate())) {
-            patient.setBirthDate(LocalDate.parse(patientUpdateDTO.birthDate()));
+        if (patientUpdateDTO.birthDate() != null) {
+            patient.setBirthDate(patientUpdateDTO.birthDate());
         }
 
         userRepository.save(user);

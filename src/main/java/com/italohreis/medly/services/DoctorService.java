@@ -12,11 +12,9 @@ import com.italohreis.medly.repositories.DoctorRepository;
 import com.italohreis.medly.repositories.UserRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
-import org.flywaydb.core.internal.util.StringUtils;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
 
-import java.util.Optional;
 import java.util.UUID;
 
 @Service
@@ -24,7 +22,6 @@ import java.util.UUID;
 public class DoctorService {
     private final UserService userService;
     private final UserRepository userRepository;
-    private final PasswordEncoder passwordEncoder;
     private final DoctorMapper doctorMapper;
     private final DoctorRepository doctorRepository;
 
@@ -53,23 +50,24 @@ public class DoctorService {
         Doctor doctor = doctorRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Doctor", "id", id));
 
-        Optional<User> userOptional = userRepository.findById(doctor.getUser().getId());
-        if (userOptional.isEmpty()) {
-            throw new ResourceNotFoundException("User", "id", doctor.getUser().getId());
+        User user = doctor.getUser();
+
+        if (StringUtils.hasText(doctorUpdateDTO.name())) {
+            user.setName(doctorUpdateDTO.name());
+            doctor.setName(doctorUpdateDTO.name());
         }
 
-        User user = userOptional.get();
         if (StringUtils.hasText(doctorUpdateDTO.email()) && !doctorUpdateDTO.email().equalsIgnoreCase(user.getEmail())) {
             userService.checkIfEmailExists(doctorUpdateDTO.email());
             user.setEmail(doctorUpdateDTO.email());
         }
-        if (StringUtils.hasText(doctorUpdateDTO.name())) {
-            user.setName(doctorUpdateDTO.name());
+
+        if (doctorUpdateDTO.speciality() != null) {
+            doctor.setSpecialty(doctorUpdateDTO.speciality());
         }
 
-        doctor.setSpecialty(doctorUpdateDTO.speciality() != null ? doctorUpdateDTO.speciality() : doctor.getSpecialty());
-
         userRepository.save(user);
+
         return doctorMapper.toDto(doctor);
     }
 }

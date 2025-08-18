@@ -2,6 +2,7 @@ package com.italohreis.medly.security;
 
 import com.italohreis.medly.models.User;
 import com.italohreis.medly.repositories.DoctorRepository;
+import com.italohreis.medly.repositories.PatientRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
@@ -13,6 +14,7 @@ import java.util.UUID;
 public class SecurityService {
 
     private final DoctorRepository doctorRepository;
+    private final PatientRepository patientRepository;
 
     public boolean isDoctorOwner(Authentication authentication, UUID doctorId) {
         User loggedInUser = (User) authentication.getPrincipal();
@@ -23,7 +25,7 @@ public class SecurityService {
 
     public boolean isPatientOwner(Authentication authentication, UUID patientId) {
         User loggedInUser = (User) authentication.getPrincipal();
-        return doctorRepository.findById(patientId)
+        return patientRepository.findById(patientId)
                 .map(patient -> patient.getUser().getId().equals(loggedInUser.getId()))
                 .orElse(false);
     }

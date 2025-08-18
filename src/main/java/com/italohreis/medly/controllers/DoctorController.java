@@ -25,7 +25,7 @@ public class DoctorController {
     }
 
     @PutMapping("/{id}")
-    @PreAuthorize("hasRole('ADMIN') and @securityService.isDoctorOwner(authentication, #id)" )
+    @PreAuthorize("hasRole('ADMIN') or @securityService.isDoctorOwner(authentication, #id)" )
     public ResponseEntity<DoctorResponseDTO> updateDoctor(@PathVariable("id") UUID id,
                                                           @RequestBody @Valid DoctorUpdateDTO doctorUpdateDTO) {
         return ResponseEntity.status(HttpStatus.OK).body(doctorService.updateDoctor(id, doctorUpdateDTO));
