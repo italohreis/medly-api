@@ -1,6 +1,8 @@
 package com.italohreis.medly.services;
 
 import com.italohreis.medly.dtos.availability.AvailabilityResponseDTO;
+import com.italohreis.medly.dtos.availability.AvailabilityUpdateStatusDTO;
+import com.italohreis.medly.enums.AvailabilityStatus;
 import com.italohreis.medly.enums.Speciality;
 import com.italohreis.medly.exceptions.BusinessRuleException;
 import com.italohreis.medly.exceptions.ResourceNotFoundException;
@@ -72,7 +74,7 @@ public class AvailabilityService {
             List<Predicate> predicates = new ArrayList<>();
             Join<Availability, Doctor> doctorJoin = root.join("doctor");
 
-            predicates.add(criteriaBuilder.isTrue(root.get("isAvailable")));
+            predicates.add(criteriaBuilder.equal(root.get("status"), AvailabilityStatus.AVAILABLE));
 
             predicates.add(criteriaBuilder.greaterThanOrEqualTo(root.get("startTime"), startDate));
             predicates.add(criteriaBuilder.lessThanOrEqualTo(root.get("endTime"), endDate));
@@ -95,5 +97,38 @@ public class AvailabilityService {
 
         Page<Availability> results = availabilityRepository.findAll(spec, pageable);
         return results.map(availabilityMapper::toDto);
+    }
+
+    @Transactional
+    public AvailabilityResponseDTO updateAvailabilityStatus(UUID availabilityId, AvailabilityUpdateStatusDTO availabilityUpdateStatusDTO) {
+        AvailabilityStatus newStatus = availabilityUpdateStatusDTO.status();
+        Availability availability = availabilityRepository.findById(availabilityId)
+                .orElseThrow(() -> new ResourceNotFoundException("Availability", "id", availabilityId));
+
+        AvailabilityStatus currentStatus = availability.getStatus();
+
+        if (currentStatus == newStatus) {
+            throw new BusinessRuleException("The availability is already in the requested status.");
+        }
+
+        switch (newStatus) {
+            case AVAILABLE:
+                if (currentStatus == AvailabilityStatus.BOOKED) {
+                    throw new BusinessRuleException("This time has an appointment. Cancel an appointment to free it up.");
+                }
+                availability.setStatus(AvailabilityStatus.AVAILABLE);
+                break;
+            case BLOCKED:
+                if (currentStatus == AvailabilityStatus.BOOKED) {
+                    throw new BusinessRuleException("This time has an appointment. Cancel an appointment to block it.");
+                }
+                availability.setStatus(AvailabilityStatus.BLOCKED);
+                break;
+
+            case BOOKED:
+                throw new BusinessRuleException("Cannot change status to BOOKED directly. Please use the appointment service to book an appointment.");
+        }
+
+        return availabilityMapper.toDto(availabilityRepository.save(availability));
     }
 }

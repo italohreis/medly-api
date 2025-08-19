@@ -2,6 +2,7 @@ package com.italohreis.medly.controllers;
 
 import com.italohreis.medly.dtos.availability.AvailabilityRequestDTO;
 import com.italohreis.medly.dtos.availability.AvailabilityResponseDTO;
+import com.italohreis.medly.dtos.availability.AvailabilityUpdateStatusDTO;
 import com.italohreis.medly.mappers.AvailabilityMapper;
 import com.italohreis.medly.services.AvailabilityService;
 import jakarta.validation.Valid;
@@ -55,4 +56,12 @@ public class AvailabilityController {
                 availabilityService.searchAvailabilities(doctorId, speciality, startDate, endDate, pageable));
     }
 
+    @PatchMapping("/{id}")
+    @PreAuthorize("hasRole('ADMIN') or @securityService.isDoctorOwnerOfAvailability(authentication, #id)")
+    public ResponseEntity<AvailabilityResponseDTO> updateAvailabilityStatus(
+            @PathVariable UUID id,
+            @RequestBody @Valid AvailabilityUpdateStatusDTO availabilityUpdateStatusDTO) {
+        return ResponseEntity.status(HttpStatus.OK).body(
+                availabilityService.updateAvailabilityStatus(id, availabilityUpdateStatusDTO));
+    }
 }
