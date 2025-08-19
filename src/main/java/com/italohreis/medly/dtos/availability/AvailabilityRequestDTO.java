@@ -1,5 +1,6 @@
 package com.italohreis.medly.dtos.availability;
 
+import com.italohreis.medly.enums.AvailabilityStatus;
 import jakarta.validation.constraints.NotNull;
 
 import java.time.LocalDateTime;
@@ -16,5 +17,5 @@ public record AvailabilityRequestDTO(
     LocalDateTime endTime,
 
     @NotNull(message = "Availability status is required")
-    Boolean isAvailable
+    AvailabilityStatus status
 ) {}
