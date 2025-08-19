@@ -8,11 +8,13 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDateTime;
 import java.util.UUID;
 
 @RestController
@@ -39,6 +41,18 @@ public class AvailabilityController {
             Pageable pageable) {
 
         return ResponseEntity.status(HttpStatus.OK).body(availabilityService.getAvailabilitiesByDoctorId(doctorId, pageable));
+    }
+
+    @GetMapping("/search")
+    public ResponseEntity<Page<AvailabilityResponseDTO>> searchAvailabilities(
+            @RequestParam(value = "doctorId", required = false) UUID doctorId,
+            @RequestParam(value = "speciality", required = false) String speciality,
+            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime startDate,
+            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime endDate,
+            Pageable pageable) {
+
+        return ResponseEntity.status(HttpStatus.OK).body(
+                availabilityService.searchAvailabilities(doctorId, speciality, startDate, endDate, pageable));
     }
 
 }
