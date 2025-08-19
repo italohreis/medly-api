@@ -1,5 +1,7 @@
 package com.italohreis.medly.dtos.availability;
 
+import com.italohreis.medly.enums.AvailabilityStatus;
+
 import java.time.LocalDateTime;
 import java.util.UUID;
 
@@ -9,5 +11,5 @@ public record AvailabilityResponseDTO(
     String doctorName,
     LocalDateTime startTime,
     LocalDateTime endTime,
-    Boolean isAvailable
+    AvailabilityStatus status
 ) {}

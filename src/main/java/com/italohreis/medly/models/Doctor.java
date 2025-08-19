@@ -1,5 +1,6 @@
 package com.italohreis.medly.models;
 
+import com.italohreis.medly.enums.Speciality;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -23,7 +24,9 @@ public class Doctor {
 
     private String name;
     private String crm;
-    private String specialty;
+
+    @Enumerated(EnumType.STRING)
+    private Speciality specialty;
 
     @OneToOne
     @JoinColumn(name = "user_id")

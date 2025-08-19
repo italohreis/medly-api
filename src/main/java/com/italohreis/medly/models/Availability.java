@@ -1,5 +1,6 @@
 package com.italohreis.medly.models;
 
+import com.italohreis.medly.enums.AvailabilityStatus;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -27,5 +28,14 @@ public class Availability {
     private LocalDateTime startTime;
     private LocalDateTime endTime;
 
-    private Boolean isAvailable;
+    @Enumerated(EnumType.STRING)
+    @Column(name = "status", nullable = false)
+    private AvailabilityStatus status;
+
+    @PrePersist
+    public void prePersist() {
+        if (status == null) {
+            status = AvailabilityStatus.AVAILABLE;
+        }
+    }
 }

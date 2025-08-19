@@ -2,20 +2,20 @@ package com.italohreis.medly.controllers;
 
 import com.italohreis.medly.dtos.availability.AvailabilityRequestDTO;
 import com.italohreis.medly.dtos.availability.AvailabilityResponseDTO;
-import com.italohreis.medly.exceptions.ForbiddenException;
+import com.italohreis.medly.dtos.availability.AvailabilityUpdateStatusDTO;
 import com.italohreis.medly.mappers.AvailabilityMapper;
-import com.italohreis.medly.models.Availability;
-import com.italohreis.medly.models.User;
 import com.italohreis.medly.services.AvailabilityService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.Authentication;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDateTime;
 import java.util.UUID;
 
 @RestController
@@ -26,34 +26,42 @@ public class AvailabilityController {
     private final AvailabilityMapper availabilityMapper;
 
     @PostMapping
-    public ResponseEntity<?> createAvailability(
-            @RequestBody @Valid AvailabilityRequestDTO availabilityRequestDTO,
-            Authentication authentication) {
+    @PreAuthorize("hasRole('ADMIN') or @securityService.isDoctorOwner(authentication, #availabilityRequestDTO.doctorId)")
+    public ResponseEntity<AvailabilityResponseDTO> createAvailability(
+            @RequestBody @Valid AvailabilityRequestDTO availabilityRequestDTO) {
 
-        checkOwnership(authentication, availabilityRequestDTO.doctorId());
-        Availability availability = availabilityMapper.toModel(availabilityRequestDTO);
         return ResponseEntity.status(HttpStatus.CREATED).body(
-                availabilityService.createAvailability(availability));
+                availabilityService.createAvailability(
+                        availabilityMapper.toModel(availabilityRequestDTO)));
     }
 
     @GetMapping
+    @PreAuthorize("hasRole('ADMIN') or @securityService.isDoctorOwner(authentication, #doctorId)")
     public ResponseEntity<Page<AvailabilityResponseDTO>> getAvailabilitiesByDoctorId(
             @RequestParam("doctorId") UUID doctorId,
-            Pageable pageable,
-            Authentication authentication) {
+            Pageable pageable) {
 
-        checkOwnership(authentication, doctorId);
-
-        Page<AvailabilityResponseDTO> availabilitiesPage = availabilityService.getAvailabilitiesByDoctorId(doctorId, pageable);
-
-        return ResponseEntity.status(HttpStatus.OK).body(availabilitiesPage);
+        return ResponseEntity.status(HttpStatus.OK).body(availabilityService.getAvailabilitiesByDoctorId(doctorId, pageable));
     }
 
-    private void checkOwnership(Authentication authentication, UUID requestedDoctorId) {
-        User loggedInUser = (User) authentication.getPrincipal();
+    @GetMapping("/search")
+    public ResponseEntity<Page<AvailabilityResponseDTO>> searchAvailabilities(
+            @RequestParam(value = "doctorId", required = false) UUID doctorId,
+            @RequestParam(value = "speciality", required = false) String speciality,
+            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime startDate,
+            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime endDate,
+            Pageable pageable) {
 
-        if (loggedInUser.getDoctor() == null || !loggedInUser.getDoctor().getId().equals(requestedDoctorId)) {
-            throw new ForbiddenException("Access denied. You do not own this resource.");
-        }
+        return ResponseEntity.status(HttpStatus.OK).body(
+                availabilityService.searchAvailabilities(doctorId, speciality, startDate, endDate, pageable));
+    }
+
+    @PatchMapping("/{id}")
+    @PreAuthorize("hasRole('ADMIN') or @securityService.isDoctorOwnerOfAvailability(authentication, #id)")
+    public ResponseEntity<AvailabilityResponseDTO> updateAvailabilityStatus(
+            @PathVariable UUID id,
+            @RequestBody @Valid AvailabilityUpdateStatusDTO availabilityUpdateStatusDTO) {
+        return ResponseEntity.status(HttpStatus.OK).body(
+                availabilityService.updateAvailabilityStatus(id, availabilityUpdateStatusDTO));
     }
 }
