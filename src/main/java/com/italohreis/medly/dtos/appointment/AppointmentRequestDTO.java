@@ -7,9 +7,9 @@ import java.time.LocalDateTime;
 import java.util.UUID;
 
 public record AppointmentRequestDTO(
-    @NotBlank(message = "Doctor ID is required")
-    UUID doctorId,
+    @NotNull(message = "Availability ID is required")
+    UUID availabilityId,
 
-    @NotNull(message = "Appointment date and time is required")
-    LocalDateTime dateTime
+    @NotNull(message = "Patient ID is required")
+    UUID patientId
 ) {}

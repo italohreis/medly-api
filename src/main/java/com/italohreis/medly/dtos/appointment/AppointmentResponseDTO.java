@@ -7,10 +7,12 @@ import java.util.UUID;
 
 public record AppointmentResponseDTO(
         UUID id,
-        LocalDateTime date,
         AppointmentStatus status,
-        UUID doctorId,
-        String doctorName,
-        UUID patientId,
-        String patientName
-) {}
+        LocalDateTime startTime,
+        LocalDateTime endTime,
+        DoctorInfo doctor,
+        PatientInfo patient
+) {
+    public record DoctorInfo(UUID id, String name, String crm) {}
+    public record PatientInfo(UUID id, String name) {}
+}
