@@ -24,7 +24,7 @@ public class AppointmentSpecification {
 
         return (root, query, criteriaBuilder) ->
                 criteriaBuilder.between(
-                        root.get("availability").get("startTime"),
+                        root.get("timeSlot").get("startTime"),
                         startDateTime,
                         endDateTime
                 );

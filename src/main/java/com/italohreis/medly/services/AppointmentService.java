@@ -8,14 +8,8 @@ import com.italohreis.medly.enums.Role;
 import com.italohreis.medly.exceptions.BusinessRuleException;
 import com.italohreis.medly.exceptions.ResourceNotFoundException;
 import com.italohreis.medly.mappers.AppointmentMapper;
-import com.italohreis.medly.models.Appointment;
-import com.italohreis.medly.models.Availability;
-import com.italohreis.medly.models.Patient;
-import com.italohreis.medly.models.User;
-import com.italohreis.medly.repositories.AppointmentRepository;
-import com.italohreis.medly.repositories.AvailabilityRepository;
-import com.italohreis.medly.repositories.PatientRepository;
-import com.italohreis.medly.repositories.UserRepository;
+import com.italohreis.medly.models.*;
+import com.italohreis.medly.repositories.*;
 import com.italohreis.medly.repositories.specifications.AppointmentSpecification;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -33,29 +27,30 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class AppointmentService {
     private final AppointmentRepository appointmentRepository;
-    private final AvailabilityRepository availabilityRepository;
+    private final AvailabilityWindowRepository availabilityRepository;
     private final PatientRepository patientRepository;
     private final AppointmentMapper appointmentMapper;
     private final UserRepository userRepository;
+    private final TimeSlotRepository timeSlotRepository;
 
     @Transactional
     public AppointmentResponseDTO createAppointment(AppointmentRequestDTO appointmentRequestDTO) {
-        Availability availability = availabilityRepository.findById(appointmentRequestDTO.availabilityId())
-                .orElseThrow(() -> new ResourceNotFoundException("Availability", "id", appointmentRequestDTO.availabilityId()));
+        TimeSlot timeSlot = timeSlotRepository.findById(appointmentRequestDTO.timeSlotId())
+                .orElseThrow(() -> new ResourceNotFoundException("TimeSlot", "id", appointmentRequestDTO.timeSlotId()));
 
-        if (availability.getStatus() != AvailabilityStatus.AVAILABLE) {
-            throw new BusinessRuleException("Availability is not available for booking");
+        if (timeSlot.getStatus() != AvailabilityStatus.AVAILABLE) {
+            throw new BusinessRuleException("This time slot is not available for booking.");
         }
 
         Patient patient = patientRepository.findById(appointmentRequestDTO.patientId())
                 .orElseThrow(() -> new ResourceNotFoundException("Patient", "id", appointmentRequestDTO.patientId()));
 
-        availability.setStatus(AvailabilityStatus.BOOKED);
-        availabilityRepository.save(availability);
+        timeSlot.setStatus(AvailabilityStatus.BOOKED);
+        timeSlotRepository.save(timeSlot);
 
         Appointment appointment = new Appointment();
-        appointment.setAvailability(availability);
-        appointment.setDoctor(availability.getDoctor());
+        appointment.setTimeSlot(timeSlot);
+        appointment.setDoctor(timeSlot.getAvailabilityWindow().getDoctor());
         appointment.setPatient(patient);
         appointment.setStatus(AppointmentStatus.SCHEDULED);
 
@@ -107,18 +102,18 @@ public class AppointmentService {
                 .orElseThrow(() -> new ResourceNotFoundException("Appointment", "id", appointmentId));
 
         AppointmentStatus currentStatus = appointment.getStatus();
-        if (currentStatus == AppointmentStatus.COMPLETED ||
-            currentStatus == AppointmentStatus.CANCELLED) {
-            throw new BusinessRuleException("Appointment cannot be canceled because it's already " +
-                    appointment.getStatus().name().toLowerCase()
+        if (currentStatus == AppointmentStatus.CANCELLED ||
+            currentStatus == AppointmentStatus.COMPLETED) {
+            throw new BusinessRuleException(
+                    "Appointment cannot be canceled because its status is " + currentStatus.name().toLowerCase()
             );
         }
 
         appointment.setStatus(AppointmentStatus.CANCELLED);
 
-        Availability availability = appointment.getAvailability();
-        availability.setStatus(AvailabilityStatus.AVAILABLE);
-        availabilityRepository.save(availability);
+        TimeSlot timeSlot = appointment.getTimeSlot();
+        timeSlot.setStatus(AvailabilityStatus.AVAILABLE);
+        timeSlotRepository.save(timeSlot);
 
         return appointmentMapper.toDto(appointmentRepository.save(appointment));
     }

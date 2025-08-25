@@ -36,5 +36,5 @@ public class Doctor {
     private List<Appointment> appointments;
 
     @OneToMany(mappedBy = "doctor", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<Availability> availabilities = new ArrayList<>();
+    private List<AvailabilityWindow> availabilityWindows = new ArrayList<>();
 }

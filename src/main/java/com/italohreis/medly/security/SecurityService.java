@@ -2,10 +2,12 @@
 package com.italohreis.medly.security;
 
 import com.italohreis.medly.exceptions.ResourceNotFoundException;
-import com.italohreis.medly.models.Appointment;
+import com.italohreis.medly.models.AvailabilityWindow;
+import com.italohreis.medly.models.TimeSlot;
 import com.italohreis.medly.models.User;
 import com.italohreis.medly.repositories.AppointmentRepository;
-import com.italohreis.medly.repositories.AvailabilityRepository;
+import com.italohreis.medly.repositories.AvailabilityWindowRepository;
+import com.italohreis.medly.repositories.TimeSlotRepository;
 import com.italohreis.medly.repositories.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.Authentication;
@@ -18,8 +20,9 @@ import java.util.UUID;
 public class SecurityService {
 
     private final UserRepository userRepository;
-    private final AvailabilityRepository availabilityRepository;
+    private final AvailabilityWindowRepository availabilityRepository;
     private final AppointmentRepository appointmentRepository;
+    private final TimeSlotRepository timeSlotRepository;
 
     public boolean isDoctorOwner(Authentication authentication, UUID doctorId) {
         String userEmail = (String) authentication.getPrincipal();
@@ -76,5 +79,23 @@ public class SecurityService {
         return appointmentRepository.findById(appointmentId)
                 .map(appointment -> appointment.getDoctor().getId().equals(loggedInUser.getDoctor().getId()))
                 .orElse(false);
+    }
+
+    public boolean isDoctorOwnerOfTimeSlot(Authentication authentication, UUID timeSlotId) {
+        String userEmail = (String) authentication.getPrincipal();
+
+        User loggedInUser = userRepository.findByEmail(userEmail).orElse(null);
+
+        if (loggedInUser == null || loggedInUser.getDoctor() == null) {
+            return false;
+        }
+
+        TimeSlot timeSlot = timeSlotRepository.findById(timeSlotId).orElseThrow(
+                () -> new ResourceNotFoundException("TimeSlot", "id", timeSlotId)
+        );
+
+        UUID ownerDoctorId = timeSlot.getAvailabilityWindow().getDoctor().getId();
+
+        return ownerDoctorId.equals(loggedInUser.getDoctor().getId());
     }
 }
