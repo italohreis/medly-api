@@ -47,4 +47,11 @@ public class AppointmentController {
         return ResponseEntity.status(HttpStatus.OK).body(
                 appointmentService.listAppointments(doctorId, patientId, startDate, endDate, pageable));
     }
+
+    @GetMapping("/{id}")
+    @PreAuthorize("hasRole('ADMIN') or @securityService.isUserPartOfAppointment(authentication, #id)")
+    public ResponseEntity<AppointmentResponseDTO> getAppointmentById(@PathVariable UUID id) {
+        return ResponseEntity.status(HttpStatus.OK).body(
+                appointmentService.getAppointmentById(id));
+    }
 }

@@ -94,4 +94,10 @@ public class AppointmentService {
         return appointmentRepository.findAll(spec, pageable)
                 .map(appointmentMapper::toDto);
     }
+
+    public AppointmentResponseDTO getAppointmentById(UUID appointmentId) {
+        Appointment appointment = appointmentRepository.findById(appointmentId)
+                .orElseThrow(() -> new ResourceNotFoundException("Appointment", "id", appointmentId));
+        return appointmentMapper.toDto(appointment);
+    }
 }
