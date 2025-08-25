@@ -21,7 +21,9 @@ public class Appointment {
     @GeneratedValue(strategy = GenerationType.AUTO)
     private UUID id;
 
-    private LocalDateTime dateTime;
+    @OneToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "availability_id", unique = true)
+    private Availability availability;
 
     @ManyToOne
     @JoinColumn(name = "doctor_id")

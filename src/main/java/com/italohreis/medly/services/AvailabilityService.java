@@ -11,6 +11,7 @@ import com.italohreis.medly.models.Availability;
 import com.italohreis.medly.models.Doctor;
 import com.italohreis.medly.repositories.AvailabilityRepository;
 import com.italohreis.medly.repositories.DoctorRepository;
+import com.italohreis.medly.repositories.specifications.AvailabilitySpecification;
 import jakarta.persistence.criteria.Join;
 import jakarta.persistence.criteria.Predicate;
 import jakarta.transaction.Transactional;
@@ -70,33 +71,28 @@ public class AvailabilityService {
     public Page<AvailabilityResponseDTO> searchAvailabilities(
             UUID doctorId, String specialty, LocalDateTime startDate, LocalDateTime endDate, Pageable pageable) {
 
-        Specification<Availability> spec = (root, query, criteriaBuilder) -> {
-            List<Predicate> predicates = new ArrayList<>();
-            Join<Availability, Doctor> doctorJoin = root.join("doctor");
-
-            predicates.add(criteriaBuilder.equal(root.get("status"), AvailabilityStatus.AVAILABLE));
-
-            predicates.add(criteriaBuilder.greaterThanOrEqualTo(root.get("startTime"), startDate));
-            predicates.add(criteriaBuilder.lessThanOrEqualTo(root.get("endTime"), endDate));
-
-            if (doctorId != null) {
-                predicates.add(criteriaBuilder.equal(doctorJoin.get("id"), doctorId));
+        Speciality specialityEnum = null;
+        if (specialty != null && !specialty.isBlank()) {
+            try {
+                specialityEnum = Speciality.valueOf(specialty.toUpperCase());
+            } catch (IllegalArgumentException e) {
+                throw new BusinessRuleException("Invalid specialty provided: " + specialty);
             }
+        }
 
-            if (specialty != null && !specialty.isBlank()) {
-                try {
-                    Speciality specialityEnum = Speciality.valueOf(specialty.toUpperCase());
-                    predicates.add(criteriaBuilder.equal(doctorJoin.get("specialty"), specialityEnum));
-                } catch (IllegalArgumentException e) {
-                    throw new BusinessRuleException("Invalid specialty provided: " + specialty);
-                }
-            }
+        Specification<Availability> spec = AvailabilitySpecification.isAvailable();
 
-            return criteriaBuilder.and(predicates.toArray(new Predicate[0]));
-        };
+        spec = spec.and(AvailabilitySpecification.isWithinDateRange(startDate, endDate));
 
-        Page<Availability> results = availabilityRepository.findAll(spec, pageable);
-        return results.map(availabilityMapper::toDto);
+        if (doctorId != null) {
+            spec = spec.and(AvailabilitySpecification.hasDoctorId(doctorId));
+        }
+        if (specialityEnum != null) {
+            spec = spec.and(AvailabilitySpecification.hasSpecialty(specialityEnum));
+        }
+
+        return availabilityRepository.findAll(spec, pageable)
+                .map(availabilityMapper::toDto);
     }
 
     @Transactional
