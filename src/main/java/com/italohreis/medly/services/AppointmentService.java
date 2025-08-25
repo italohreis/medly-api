@@ -100,4 +100,42 @@ public class AppointmentService {
                 .orElseThrow(() -> new ResourceNotFoundException("Appointment", "id", appointmentId));
         return appointmentMapper.toDto(appointment);
     }
+
+    @Transactional
+    public AppointmentResponseDTO cancelAppointment(UUID appointmentId) {
+        Appointment appointment = appointmentRepository.findById(appointmentId)
+                .orElseThrow(() -> new ResourceNotFoundException("Appointment", "id", appointmentId));
+
+        AppointmentStatus currentStatus = appointment.getStatus();
+        if (currentStatus == AppointmentStatus.COMPLETED ||
+            currentStatus == AppointmentStatus.CANCELLED) {
+            throw new BusinessRuleException("Appointment cannot be canceled because it's already " +
+                    appointment.getStatus().name().toLowerCase()
+            );
+        }
+
+        appointment.setStatus(AppointmentStatus.CANCELLED);
+
+        Availability availability = appointment.getAvailability();
+        availability.setStatus(AvailabilityStatus.AVAILABLE);
+        availabilityRepository.save(availability);
+
+        return appointmentMapper.toDto(appointmentRepository.save(appointment));
+    }
+
+    public AppointmentResponseDTO completeAppointment(UUID appointmentId) {
+        Appointment appointment = appointmentRepository.findById(appointmentId)
+                .orElseThrow(() -> new ResourceNotFoundException("Appointment", "id", appointmentId));
+
+        AppointmentStatus currentStatus = appointment.getStatus();
+        if (currentStatus == AppointmentStatus.CANCELLED ||
+            currentStatus == AppointmentStatus.COMPLETED) {
+            throw new BusinessRuleException(
+                    "Appointment cannot be completed because its status is " + currentStatus.name().toLowerCase()
+            );
+        }
+        appointment.setStatus(AppointmentStatus.COMPLETED);
+
+        return appointmentMapper.toDto(appointmentRepository.save(appointment));
+    }
 }

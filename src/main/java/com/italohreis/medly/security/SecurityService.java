@@ -64,4 +64,17 @@ public class SecurityService {
                 })
                 .orElse(false);
     }
+
+    public boolean isDoctorOwnerOfAppointment(Authentication authentication, UUID appointmentId) {
+        String userEmail = (String) authentication.getPrincipal();
+
+        User loggedInUser = userRepository.findByEmail(userEmail).orElse(null);
+        if (loggedInUser == null || loggedInUser.getDoctor() == null) {
+            return false;
+        }
+
+        return appointmentRepository.findById(appointmentId)
+                .map(appointment -> appointment.getDoctor().getId().equals(loggedInUser.getDoctor().getId()))
+                .orElse(false);
+    }
 }

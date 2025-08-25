@@ -54,4 +54,20 @@ public class AppointmentController {
         return ResponseEntity.status(HttpStatus.OK).body(
                 appointmentService.getAppointmentById(id));
     }
+
+    @PatchMapping("/{id}/cancel")
+    @PreAuthorize("hasRole('ADMIN') or @securityService.isUserPartOfAppointment(authentication, #id)")
+    public ResponseEntity<AppointmentResponseDTO> cancelAppointment(@PathVariable UUID id) {
+        return ResponseEntity.status(HttpStatus.OK).body(
+                appointmentService.cancelAppointment(id)
+        );
+    }
+
+    @PatchMapping("/{id}/complete")
+    @PreAuthorize("hasRole('ADMIN') or @securityService.isDoctorOwnerOfAppointment(authentication, #id)")
+    public ResponseEntity<AppointmentResponseDTO> completeAppointment(@PathVariable UUID id) {
+        return ResponseEntity.status(HttpStatus.OK).body(
+                appointmentService.completeAppointment(id)
+        );
+    }
 }
