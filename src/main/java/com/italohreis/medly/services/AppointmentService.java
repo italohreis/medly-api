@@ -81,8 +81,8 @@ public class AppointmentService {
                 spec = AppointmentSpecification.hasDoctorId(doctorId);
             }
             if (patientId != null) {
-                Specification<Appointment> doctorSpec = AppointmentSpecification.hasDoctorId(doctorId);
-                spec = (spec == null) ? doctorSpec : spec.and(doctorSpec);
+                Specification<Appointment> patientSpec = AppointmentSpecification.hasPatientId(patientId);
+                spec = (spec == null) ? patientSpec : spec.and(patientSpec);
             }
         }
 
