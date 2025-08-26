@@ -122,6 +122,23 @@ public class AvailabilityWindowService {
         TimeSlot timeSlot = timeSlotRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("TimeSlot", "id", id));
 
+        AvailabilityStatus newStatus = dto.status();
+        AvailabilityStatus currentStatus = timeSlot.getStatus();
+
+
+        if (currentStatus == newStatus) {
+            throw new BusinessRuleException("The time slot is already in the requested status.");
+        }
+
+        if (currentStatus == AvailabilityStatus.BOOKED) {
+            throw new BusinessRuleException("Cannot directly change the status of a booked time slot. Please cancel the appointment first.");
+        }
+
+        if (newStatus == AvailabilityStatus.BOOKED) {
+            throw new BusinessRuleException("This endpoint can only be used to set status to AVAILABLE or BLOCKED.");
+        }
+
+
         timeSlot.setStatus(dto.status());
 
         return timeSlotMapper.toDto(timeSlotRepository.save(timeSlot));
