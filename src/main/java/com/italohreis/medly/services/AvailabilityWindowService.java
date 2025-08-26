@@ -5,7 +5,7 @@ import com.italohreis.medly.dtos.availabilityWindow.AvailabilityWindowResponseDT
 import com.italohreis.medly.dtos.timeslot.TimeSlotResponseDTO;
 import com.italohreis.medly.dtos.timeslot.TimeSlotStatusUpdateDTO;
 import com.italohreis.medly.enums.AvailabilityStatus;
-import com.italohreis.medly.enums.Speciality;
+import com.italohreis.medly.enums.Specialty;
 import com.italohreis.medly.exceptions.BusinessRuleException;
 import com.italohreis.medly.exceptions.ResourceNotFoundException;
 import com.italohreis.medly.mappers.AvailabilityWindowMapper;
@@ -85,10 +85,10 @@ public class AvailabilityWindowService {
 
     public Page<TimeSlotResponseDTO> searchAvailableTimeSlots(
         UUID doctorId, String specialty, LocalDateTime startDate, LocalDateTime endDate, Pageable pageable) {
-        Speciality specialityEnum = null;
+        Specialty specialtyEnum = null;
         if (specialty != null && !specialty.isBlank()) {
             try {
-                specialityEnum = Speciality.valueOf(specialty.toUpperCase());
+                specialtyEnum = Specialty.valueOf(specialty.toUpperCase());
             } catch (IllegalArgumentException e) {
                 throw new BusinessRuleException("Invalid specialty provided: " + specialty);
             }
@@ -100,8 +100,8 @@ public class AvailabilityWindowService {
         if (doctorId != null) {
             spec = spec.and(TimeSlotSpec.hasDoctorId(doctorId));
         }
-        if (specialityEnum != null) {
-            spec = spec.and(TimeSlotSpec.hasSpecialty(specialityEnum));
+        if (specialtyEnum != null) {
+            spec = spec.and(TimeSlotSpec.hasSpecialty(specialtyEnum));
         }
 
         return timeSlotRepository.findAll(spec, pageable)

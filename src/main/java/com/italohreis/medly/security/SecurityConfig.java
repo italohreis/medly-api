@@ -43,6 +43,8 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.POST, "/patients").permitAll()
                         .requestMatchers(HttpMethod.GET, "/schedule/timeslots/search").permitAll()
                         .requestMatchers(HttpMethod.POST, "/doctors").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.PUT, "/doctors/{id}").hasAnyRole("ADMIN", "DOCTOR")
+                        .requestMatchers(HttpMethod.GET, "/doctors/**").authenticated()
                         .requestMatchers("/schedule/**").hasAnyRole("ADMIN", "DOCTOR")
                         .requestMatchers(HttpMethod.POST, "/appointments").hasAnyRole("ADMIN", "DOCTOR", "PATIENT")
                         .anyRequest().authenticated()

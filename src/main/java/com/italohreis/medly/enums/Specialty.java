@@ -1,6 +1,6 @@
 package com.italohreis.medly.enums;
 
-public enum Speciality {
+public enum Specialty {
     CARDIOLOGY("Cardiology"),
     DERMATOLOGY("Dermatology"),
     NEUROLOGY("Neurology"),
@@ -11,7 +11,7 @@ public enum Speciality {
 
     private final String description;
 
-    Speciality(String description) {
+    Specialty(String description) {
         this.description = description;
     }
 

@@ -1,7 +1,7 @@
 package com.italohreis.medly.repositories.specs;
 
 import com.italohreis.medly.enums.AvailabilityStatus;
-import com.italohreis.medly.enums.Speciality;
+import com.italohreis.medly.enums.Specialty;
 import com.italohreis.medly.models.AvailabilityWindow;
 import com.italohreis.medly.models.Doctor;
 import com.italohreis.medly.models.TimeSlot;
@@ -28,7 +28,7 @@ public class TimeSlotSpec {
         };
     }
 
-    public static Specification<TimeSlot> hasSpecialty(Speciality specialty) {
+    public static Specification<TimeSlot> hasSpecialty(Specialty specialty) {
         return (root, query, cb) -> {
             Join<TimeSlot, AvailabilityWindow> windowJoin = root.join("availabilityWindow");
             Join<AvailabilityWindow, Doctor> doctorJoin = windowJoin.join("doctor");

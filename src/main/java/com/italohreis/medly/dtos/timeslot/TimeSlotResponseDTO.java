@@ -1,7 +1,7 @@
 package com.italohreis.medly.dtos.timeslot;
 
 import com.italohreis.medly.enums.AvailabilityStatus;
-import com.italohreis.medly.enums.Speciality;
+import com.italohreis.medly.enums.Specialty;
 
 import java.time.LocalDateTime;
 import java.util.UUID;
@@ -16,6 +16,6 @@ public record TimeSlotResponseDTO(
     public record DoctorInfo(
             UUID id,
             String name,
-            Speciality specialty
+            Specialty specialty
     ) {}
 }
