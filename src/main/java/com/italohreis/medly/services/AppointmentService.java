@@ -10,7 +10,7 @@ import com.italohreis.medly.exceptions.ResourceNotFoundException;
 import com.italohreis.medly.mappers.AppointmentMapper;
 import com.italohreis.medly.models.*;
 import com.italohreis.medly.repositories.*;
-import com.italohreis.medly.repositories.specifications.AppointmentSpecification;
+import com.italohreis.medly.repositories.specs.AppointmentSpec;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -64,24 +64,24 @@ public class AppointmentService {
         Specification<Appointment> spec = null;
 
         if (currentUser.getRole() == Role.PATIENT) {
-            spec = AppointmentSpecification.hasPatientId(currentUser.getPatient().getId());
+            spec = AppointmentSpec.hasPatientId(currentUser.getPatient().getId());
         } else if (currentUser.getRole() == Role.DOCTOR) {
-            spec = AppointmentSpecification.hasDoctorId(currentUser.getDoctor().getId());
+            spec = AppointmentSpec.hasDoctorId(currentUser.getDoctor().getId());
             if (patientId != null) {
-                spec = spec.and(AppointmentSpecification.hasPatientId(patientId));
+                spec = spec.and(AppointmentSpec.hasPatientId(patientId));
             }
         } else if (currentUser.getRole() == Role.ADMIN) {
             if (doctorId != null) {
-                spec = AppointmentSpecification.hasDoctorId(doctorId);
+                spec = AppointmentSpec.hasDoctorId(doctorId);
             }
             if (patientId != null) {
-                Specification<Appointment> patientSpec = AppointmentSpecification.hasPatientId(patientId);
+                Specification<Appointment> patientSpec = AppointmentSpec.hasPatientId(patientId);
                 spec = (spec == null) ? patientSpec : spec.and(patientSpec);
             }
         }
 
         if (startDate != null && endDate != null) {
-            Specification<Appointment> dateSpec = AppointmentSpecification.isBetweenDates(startDate, endDate);
+            Specification<Appointment> dateSpec = AppointmentSpec.isBetweenDates(startDate, endDate);
             spec = (spec == null) ? dateSpec : spec.and(dateSpec);
         }
 

@@ -1,4 +1,4 @@
-package com.italohreis.medly.repositories.specifications;
+package com.italohreis.medly.repositories.specs;
 
 import com.italohreis.medly.enums.AvailabilityStatus;
 import com.italohreis.medly.enums.Speciality;
@@ -11,7 +11,7 @@ import org.springframework.data.jpa.domain.Specification;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
-public class TimeSlotSpecification {
+public class TimeSlotSpec {
     public static Specification<TimeSlot> isAvailable() {
         return (root, query, cb) -> cb.equal(root.get("status"), AvailabilityStatus.AVAILABLE);
     }

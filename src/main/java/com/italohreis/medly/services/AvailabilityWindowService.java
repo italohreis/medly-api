@@ -4,6 +4,7 @@ import com.italohreis.medly.dtos.availabilityWindow.AvailabilityWindowRequestDTO
 import com.italohreis.medly.dtos.availabilityWindow.AvailabilityWindowResponseDTO;
 import com.italohreis.medly.dtos.timeslot.TimeSlotResponseDTO;
 import com.italohreis.medly.dtos.timeslot.TimeSlotStatusUpdateDTO;
+import com.italohreis.medly.enums.AvailabilityStatus;
 import com.italohreis.medly.enums.Speciality;
 import com.italohreis.medly.exceptions.BusinessRuleException;
 import com.italohreis.medly.exceptions.ResourceNotFoundException;
@@ -15,7 +16,7 @@ import com.italohreis.medly.models.TimeSlot;
 import com.italohreis.medly.repositories.AvailabilityWindowRepository;
 import com.italohreis.medly.repositories.DoctorRepository;
 import com.italohreis.medly.repositories.TimeSlotRepository;
-import com.italohreis.medly.repositories.specifications.TimeSlotSpecification;
+import com.italohreis.medly.repositories.specs.TimeSlotSpec;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -83,7 +84,7 @@ public class AvailabilityWindowService {
     }
 
     public Page<TimeSlotResponseDTO> searchAvailableTimeSlots(
-                                                               UUID doctorId, String specialty, LocalDateTime startDate, LocalDateTime endDate, Pageable pageable) {
+        UUID doctorId, String specialty, LocalDateTime startDate, LocalDateTime endDate, Pageable pageable) {
         Speciality specialityEnum = null;
         if (specialty != null && !specialty.isBlank()) {
             try {
@@ -93,14 +94,14 @@ public class AvailabilityWindowService {
             }
         }
 
-        Specification<TimeSlot> spec = TimeSlotSpecification.isAvailable()
-                .and(TimeSlotSpecification.isWithinDateRange(startDate, endDate));
+        Specification<TimeSlot> spec = TimeSlotSpec.isAvailable()
+                .and(TimeSlotSpec.isWithinDateRange(startDate, endDate));
 
         if (doctorId != null) {
-            spec = spec.and(TimeSlotSpecification.hasDoctorId(doctorId));
+            spec = spec.and(TimeSlotSpec.hasDoctorId(doctorId));
         }
         if (specialityEnum != null) {
-            spec = spec.and(TimeSlotSpecification.hasSpecialty(specialityEnum));
+            spec = spec.and(TimeSlotSpec.hasSpecialty(specialityEnum));
         }
 
         return timeSlotRepository.findAll(spec, pageable)
@@ -122,8 +123,7 @@ public class AvailabilityWindowService {
                 .orElseThrow(() -> new ResourceNotFoundException("TimeSlot", "id", id));
 
         timeSlot.setStatus(dto.status());
-        TimeSlot updatedTimeSlot = timeSlotRepository.save(timeSlot);
 
-        return timeSlotMapper.toDto(updatedTimeSlot);
+        return timeSlotMapper.toDto(timeSlotRepository.save(timeSlot));
     }
 }

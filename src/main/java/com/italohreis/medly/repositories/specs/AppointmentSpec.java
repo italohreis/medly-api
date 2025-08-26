@@ -1,4 +1,4 @@
-package com.italohreis.medly.repositories.specifications;
+package com.italohreis.medly.repositories.specs;
 
 import com.italohreis.medly.models.Appointment;
 import org.springframework.data.jpa.domain.Specification;
@@ -7,7 +7,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
-public class AppointmentSpecification {
+public class AppointmentSpec {
     public static Specification<Appointment> hasPatientId(UUID patientId) {
         return (root, query, criteriaBuilder) ->
                 criteriaBuilder.equal(root.get("patient").get("id"), patientId);
