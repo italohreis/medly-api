@@ -30,8 +30,8 @@ public class ScheduleController {
     public ResponseEntity<AvailabilityWindowResponseDTO> createAvailabilityWindow(
             @RequestBody @Valid AvailabilityWindowRequestDTO dto) {
 
-        AvailabilityWindowResponseDTO response = availabilityWindowService.createAvailabilityWindow(dto);
-        return ResponseEntity.status(HttpStatus.CREATED).body(response);
+        return ResponseEntity.status(HttpStatus.CREATED).body(
+                availabilityWindowService.createAvailabilityWindow(dto));
     }
 
     @GetMapping("/windows")
@@ -40,8 +40,8 @@ public class ScheduleController {
             @RequestParam("doctorId") UUID doctorId,
             Pageable pageable) {
 
-        Page<AvailabilityWindowResponseDTO> schedule = availabilityWindowService.getDoctorSchedule(doctorId, pageable);
-        return ResponseEntity.ok(schedule);
+        return ResponseEntity.status(HttpStatus.OK).body(
+                availabilityWindowService.getDoctorSchedule(doctorId, pageable));
     }
 
     @GetMapping("/timeslots/search")
@@ -52,9 +52,8 @@ public class ScheduleController {
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime endDate,
             Pageable pageable) {
 
-        Page<TimeSlotResponseDTO> timeSlots = availabilityWindowService.searchAvailableTimeSlots(
-                doctorId, specialty, startDate, endDate, pageable);
-        return ResponseEntity.ok(timeSlots);
+        return ResponseEntity.status(HttpStatus.OK).body(
+                availabilityWindowService.searchAvailableTimeSlots(doctorId, specialty, startDate, endDate, pageable));
     }
 
     @PatchMapping("/timeslots/{id}")
@@ -63,7 +62,7 @@ public class ScheduleController {
             @PathVariable UUID id,
             @RequestBody @Valid TimeSlotStatusUpdateDTO dto) {
 
-        TimeSlotResponseDTO updatedTimeSlot = availabilityWindowService.updateTimeSlotStatus(id, dto);
-        return ResponseEntity.ok(updatedTimeSlot);
+        return ResponseEntity.status(HttpStatus.OK).body(
+                availabilityWindowService.updateTimeSlotStatus(id, dto));
     }
 }
