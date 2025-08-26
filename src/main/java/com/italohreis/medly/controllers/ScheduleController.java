@@ -23,10 +23,7 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class ScheduleController {
 
-    // Apenas uma injeção de serviço, como você decidiu.
     private final AvailabilityWindowService availabilityWindowService;
-
-    // === Endpoints para Médicos/Admins Gerenciarem a Agenda ===
 
     @PostMapping("/windows")
     @PreAuthorize("hasRole('ADMIN') or @securityService.isDoctorOwner(authentication, #dto.doctorId())")
@@ -46,8 +43,6 @@ public class ScheduleController {
         Page<AvailabilityWindowResponseDTO> schedule = availabilityWindowService.getDoctorSchedule(doctorId, pageable);
         return ResponseEntity.ok(schedule);
     }
-
-    // === Endpoints para Pacientes Buscarem Horários e Admins/Médicos Gerenciarem Slots ===
 
     @GetMapping("/timeslots/search")
     public ResponseEntity<Page<TimeSlotResponseDTO>> searchAvailableTimeSlots(

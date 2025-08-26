@@ -27,23 +27,22 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class AppointmentService {
     private final AppointmentRepository appointmentRepository;
-    private final AvailabilityWindowRepository availabilityRepository;
     private final PatientRepository patientRepository;
     private final AppointmentMapper appointmentMapper;
     private final UserRepository userRepository;
     private final TimeSlotRepository timeSlotRepository;
 
     @Transactional
-    public AppointmentResponseDTO createAppointment(AppointmentRequestDTO appointmentRequestDTO) {
-        TimeSlot timeSlot = timeSlotRepository.findById(appointmentRequestDTO.timeSlotId())
-                .orElseThrow(() -> new ResourceNotFoundException("TimeSlot", "id", appointmentRequestDTO.timeSlotId()));
+    public AppointmentResponseDTO createAppointment(AppointmentRequestDTO dto) {
+        TimeSlot timeSlot = timeSlotRepository.findById(dto.timeSlotId())
+                .orElseThrow(() -> new ResourceNotFoundException("TimeSlot", "id", dto.timeSlotId()));
 
         if (timeSlot.getStatus() != AvailabilityStatus.AVAILABLE) {
             throw new BusinessRuleException("This time slot is not available for booking.");
         }
 
-        Patient patient = patientRepository.findById(appointmentRequestDTO.patientId())
-                .orElseThrow(() -> new ResourceNotFoundException("Patient", "id", appointmentRequestDTO.patientId()));
+        Patient patient = patientRepository.findById(dto.patientId())
+                .orElseThrow(() -> new ResourceNotFoundException("Patient", "id", dto.patientId()));
 
         timeSlot.setStatus(AvailabilityStatus.BOOKED);
         timeSlotRepository.save(timeSlot);

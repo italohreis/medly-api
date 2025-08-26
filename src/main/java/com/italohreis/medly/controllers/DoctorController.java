@@ -21,14 +21,14 @@ public class DoctorController {
 
     @PostMapping
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<DoctorResponseDTO> createDoctor(@RequestBody @Valid DoctorRequestDTO doctorRequestDTO) {
-        return ResponseEntity.status(HttpStatus.CREATED).body(doctorService.createDoctor(doctorRequestDTO));
+    public ResponseEntity<DoctorResponseDTO> createDoctor(@RequestBody @Valid DoctorRequestDTO dto) {
+        return ResponseEntity.status(HttpStatus.CREATED).body(doctorService.createDoctor(dto));
     }
 
     @PutMapping("/{id}")
     @PreAuthorize("hasRole('ADMIN') or @securityService.isDoctorOwner(authentication, #id)")
     public ResponseEntity<DoctorResponseDTO> updateDoctor(@PathVariable("id") UUID id,
-                                                          @RequestBody @Valid DoctorUpdateDTO doctorUpdateDTO) {
-        return ResponseEntity.status(HttpStatus.OK).body(doctorService.updateDoctor(id, doctorUpdateDTO));
+                                                          @RequestBody @Valid DoctorUpdateDTO dto) {
+        return ResponseEntity.status(HttpStatus.OK).body(doctorService.updateDoctor(id, dto));
     }
 }

@@ -28,9 +28,7 @@ public class AppointmentController {
                     "(hasRole('PATIENT') and @securityService.isPatientOwner(authentication, #dto.patientId())) or " +
                     "(hasRole('DOCTOR') and @securityService.isDoctorOwnerOfTimeSlot(authentication, #dto.timeSlotId()))"
     )
-    public ResponseEntity<AppointmentResponseDTO> createAppointment(
-            @RequestBody @Valid AppointmentRequestDTO dto) {
-
+    public ResponseEntity<AppointmentResponseDTO> createAppointment(@RequestBody @Valid AppointmentRequestDTO dto) {
         return ResponseEntity.status(HttpStatus.CREATED).body(
                 appointmentService.createAppointment(dto));
     }

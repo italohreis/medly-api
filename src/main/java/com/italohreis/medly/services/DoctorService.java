@@ -26,17 +26,17 @@ public class DoctorService {
     private final DoctorRepository doctorRepository;
 
     @Transactional
-    public DoctorResponseDTO createDoctor(DoctorRequestDTO doctorRequestDTO) {
-        userService.checkIfEmailExists(doctorRequestDTO.email());
+    public DoctorResponseDTO createDoctor(DoctorRequestDTO dto) {
+        userService.checkIfEmailExists(dto.email());
 
         User user = userService.createUser(
-                doctorRequestDTO.name(),
-                doctorRequestDTO.email(),
-                doctorRequestDTO.password(),
+                dto.name(),
+                dto.email(),
+                dto.password(),
                 Role.DOCTOR
         );
 
-        Doctor doctor = doctorMapper.toModel(doctorRequestDTO);
+        Doctor doctor = doctorMapper.toModel(dto);
 
         user.setDoctor(doctor);
         doctor.setUser(user);
@@ -46,24 +46,24 @@ public class DoctorService {
     }
 
     @Transactional
-    public DoctorResponseDTO updateDoctor(UUID id, DoctorUpdateDTO doctorUpdateDTO) {
+    public DoctorResponseDTO updateDoctor(UUID id, DoctorUpdateDTO dto) {
         Doctor doctor = doctorRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Doctor", "id", id));
 
         User user = doctor.getUser();
 
-        if (StringUtils.hasText(doctorUpdateDTO.name())) {
-            user.setName(doctorUpdateDTO.name());
-            doctor.setName(doctorUpdateDTO.name());
+        if (StringUtils.hasText(dto.name())) {
+            user.setName(dto.name());
+            doctor.setName(dto.name());
         }
 
-        if (StringUtils.hasText(doctorUpdateDTO.email()) && !doctorUpdateDTO.email().equalsIgnoreCase(user.getEmail())) {
-            userService.checkIfEmailExists(doctorUpdateDTO.email());
-            user.setEmail(doctorUpdateDTO.email());
+        if (StringUtils.hasText(dto.email()) && !dto.email().equalsIgnoreCase(user.getEmail())) {
+            userService.checkIfEmailExists(dto.email());
+            user.setEmail(dto.email());
         }
 
-        if (doctorUpdateDTO.speciality() != null) {
-            doctor.setSpecialty(doctorUpdateDTO.speciality());
+        if (dto.speciality() != null) {
+            doctor.setSpecialty(dto.speciality());
         }
 
         userRepository.save(user);
