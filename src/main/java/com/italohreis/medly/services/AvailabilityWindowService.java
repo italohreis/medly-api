@@ -44,6 +44,16 @@ public class AvailabilityWindowService {
                 () -> new ResourceNotFoundException("Doctor", "id", dto.doctorId())
         );
 
+        List<AvailabilityWindow> overlappingWindows = availabilityWindowRepository.findOverlappingWindows(
+                doctor.getId(),
+                dto.startTime(),
+                dto.endTime()
+        );
+
+        if (!overlappingWindows.isEmpty()) {
+            throw new BusinessRuleException("The proposed availability window overlaps with an existing one.");
+        }
+
         AvailabilityWindow window = new AvailabilityWindow();
         window.setDoctor(doctor);
         window.setStartTime(dto.startTime());
