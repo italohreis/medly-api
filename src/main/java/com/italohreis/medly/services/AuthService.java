@@ -18,11 +18,11 @@ public class AuthService {
     private final PasswordEncoder passwordEncoder;
     private final JwtTokenProvider jwtTokenProvider;
 
-    public AuthResponseDTO login(AuthRequestDTO authRequestDTO) {
-        User user = userRepository.findByEmail(authRequestDTO.email())
-                .orElseThrow(() -> new ResourceNotFoundException("User", "email", authRequestDTO.email()));
+    public AuthResponseDTO login(AuthRequestDTO dto) {
+        User user = userRepository.findByEmail(dto.email())
+                .orElseThrow(() -> new ResourceNotFoundException("User", "email", dto.email()));
 
-        if (!passwordEncoder.matches(authRequestDTO.password(), user.getPassword())) {
+        if (!passwordEncoder.matches(dto.password(), user.getPassword())) {
             throw new InvalidCredentialsException();
         }
 

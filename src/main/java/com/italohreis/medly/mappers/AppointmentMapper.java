@@ -9,8 +9,8 @@ import org.mapstruct.Mapping;
 
 @Mapper(componentModel = "spring")
 public interface AppointmentMapper {
-    @Mapping(source = "availability.startTime", target = "startTime")
-    @Mapping(source = "availability.endTime", target = "endTime")
+    @Mapping(source = "timeSlot.startTime", target = "startTime")
+    @Mapping(source = "timeSlot.endTime", target = "endTime")
     @Mapping(source = "doctor", target = "doctor")
     @Mapping(source = "patient", target = "patient")
     AppointmentResponseDTO toDto(Appointment appointment);

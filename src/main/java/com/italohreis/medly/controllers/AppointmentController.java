@@ -25,14 +25,12 @@ public class AppointmentController {
     @PostMapping
     @PreAuthorize(
             "hasRole('ADMIN') or " +
-                    "(hasRole('PATIENT') and @securityService.isPatientOwner(authentication, #appointmentRequestDTO.patientId())) or " +
-                    "(hasRole('DOCTOR') and @securityService.isDoctorOwnerOfAvailability(authentication, #appointmentRequestDTO.availabilityId()))"
+                    "(hasRole('PATIENT') and @securityService.isPatientOwner(authentication, #dto.patientId())) or " +
+                    "(hasRole('DOCTOR') and @securityService.isDoctorOwnerOfTimeSlot(authentication, #dto.timeSlotId()))"
     )
-    public ResponseEntity<AppointmentResponseDTO> createAppointment(
-            @RequestBody @Valid AppointmentRequestDTO appointmentRequestDTO) {
-
+    public ResponseEntity<AppointmentResponseDTO> createAppointment(@RequestBody @Valid AppointmentRequestDTO dto) {
         return ResponseEntity.status(HttpStatus.CREATED).body(
-                appointmentService.createAppointment(appointmentRequestDTO));
+                appointmentService.createAppointment(dto));
     }
 
     @GetMapping

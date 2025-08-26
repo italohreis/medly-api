@@ -1,6 +1,6 @@
 package com.italohreis.medly.models;
 
-import com.italohreis.medly.enums.Speciality;
+import com.italohreis.medly.enums.Specialty;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -26,7 +26,7 @@ public class Doctor {
     private String crm;
 
     @Enumerated(EnumType.STRING)
-    private Speciality specialty;
+    private Specialty specialty;
 
     @OneToOne
     @JoinColumn(name = "user_id")
@@ -36,5 +36,5 @@ public class Doctor {
     private List<Appointment> appointments;
 
     @OneToMany(mappedBy = "doctor", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<Availability> availabilities = new ArrayList<>();
+    private List<AvailabilityWindow> availabilityWindows = new ArrayList<>();
 }

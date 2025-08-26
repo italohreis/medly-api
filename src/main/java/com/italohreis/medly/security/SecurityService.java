@@ -1,14 +1,16 @@
-// src/main/java/com/italohreis/medly/security/SecurityService.java
 package com.italohreis.medly.security;
 
 import com.italohreis.medly.exceptions.ResourceNotFoundException;
 import com.italohreis.medly.models.Appointment;
+import com.italohreis.medly.models.TimeSlot;
 import com.italohreis.medly.models.User;
 import com.italohreis.medly.repositories.AppointmentRepository;
-import com.italohreis.medly.repositories.AvailabilityRepository;
+import com.italohreis.medly.repositories.AvailabilityWindowRepository;
+import com.italohreis.medly.repositories.TimeSlotRepository;
 import com.italohreis.medly.repositories.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
 import java.util.UUID;
@@ -18,63 +20,74 @@ import java.util.UUID;
 public class SecurityService {
 
     private final UserRepository userRepository;
-    private final AvailabilityRepository availabilityRepository;
+    private final AvailabilityWindowRepository availabilityWindowRepository;
     private final AppointmentRepository appointmentRepository;
+    private final TimeSlotRepository timeSlotRepository;
 
     public boolean isDoctorOwner(Authentication authentication, UUID doctorId) {
-        String userEmail = (String) authentication.getPrincipal();
-        return userRepository.findByEmail(userEmail)
-                .map(user -> user.getDoctor() != null && user.getDoctor().getId().equals(doctorId))
-                .orElse(false);
+        User currentUser = getCurrentUser(authentication);
+        return currentUser.getDoctor() != null && currentUser.getDoctor().getId().equals(doctorId);
     }
 
-    public boolean isPatientOwner(Authentication authentication, UUID patientId) {
-        String userEmail = (String) authentication.getPrincipal();
-        return userRepository.findByEmail(userEmail)
-                .map(user -> user.getPatient() != null && user.getPatient().getId().equals(patientId))
-                .orElse(false);
+    public boolean isPatientOwner(Authentication authentication, UUID patientIdToCheck) {
+        User currentUser = getCurrentUser(authentication);
+        return currentUser.getPatient() != null && currentUser.getPatient().getId().equals(patientIdToCheck);
     }
 
-    public boolean isDoctorOwnerOfAvailability(Authentication authentication, UUID availabilityId) {
-        String userEmail = (String) authentication.getPrincipal();
-
-        User loggedInUser = userRepository.findByEmail(userEmail).orElse(null);
-        if (loggedInUser == null || loggedInUser.getDoctor() == null) {
+    public boolean isDoctorOwnerOfAvailabilityWindow(Authentication authentication, UUID windowId) {
+        User currentUser = getCurrentUser(authentication);
+        if (currentUser.getDoctor() == null) {
             return false;
         }
 
-        return availabilityRepository.findById(availabilityId)
-                .map(availability -> availability.getDoctor().getId().equals(loggedInUser.getDoctor().getId()))
-                .orElse(false);
+        return availabilityWindowRepository.findById(windowId)
+                .map(window -> window.getDoctor().getId().equals(currentUser.getDoctor().getId()))
+                .orElseThrow(() -> new ResourceNotFoundException("AvailabilityWindow", "id", windowId));
     }
 
     public boolean isUserPartOfAppointment(Authentication authentication, UUID appointmentId) {
-        String userEmail = (String) authentication.getPrincipal();
+        Appointment appointment = appointmentRepository.findById(appointmentId)
+                .orElseThrow(() -> new ResourceNotFoundException("Appointment", "id", appointmentId));
 
-        User loggedInUser = userRepository.findByEmail(userEmail)
-                .orElseThrow(() -> new ResourceNotFoundException("User", "email", userEmail));
+        User currentUser = getCurrentUser(authentication);
 
-        return appointmentRepository.findById(appointmentId)
-                .map(appointment -> {
-                    boolean isDoctor = loggedInUser.getDoctor() != null &&
-                            appointment.getDoctor().getId().equals(loggedInUser.getDoctor().getId());
-                    boolean isPatient = loggedInUser.getPatient() != null &&
-                            appointment.getPatient().getId().equals(loggedInUser.getPatient().getId());
-                    return isDoctor || isPatient;
-                })
-                .orElse(false);
+        boolean isPatient = currentUser.getPatient() != null &&
+                currentUser.getPatient().getId().equals(appointment.getPatient().getId());
+
+        boolean isDoctor = currentUser.getDoctor() != null &&
+                currentUser.getDoctor().getId().equals(appointment.getDoctor().getId());
+
+        return isPatient || isDoctor;
     }
 
     public boolean isDoctorOwnerOfAppointment(Authentication authentication, UUID appointmentId) {
-        String userEmail = (String) authentication.getPrincipal();
+        Appointment appointment = appointmentRepository.findById(appointmentId)
+                .orElseThrow(() -> new ResourceNotFoundException("Appointment", "id", appointmentId));
 
-        User loggedInUser = userRepository.findByEmail(userEmail).orElse(null);
-        if (loggedInUser == null || loggedInUser.getDoctor() == null) {
+        User currentUser = getCurrentUser(authentication);
+        if (currentUser.getDoctor() == null) {
             return false;
         }
 
-        return appointmentRepository.findById(appointmentId)
-                .map(appointment -> appointment.getDoctor().getId().equals(loggedInUser.getDoctor().getId()))
-                .orElse(false);
+        return appointment.getDoctor().getId().equals(currentUser.getDoctor().getId());
+    }
+
+    public boolean isDoctorOwnerOfTimeSlot(Authentication authentication, UUID timeSlotId) {
+        User currentUser = getCurrentUser(authentication);
+        if (currentUser.getDoctor() == null) {
+            return false;
+        }
+
+        TimeSlot timeSlot = timeSlotRepository.findById(timeSlotId)
+                .orElseThrow(() -> new ResourceNotFoundException("TimeSlot", "id", timeSlotId));
+
+        UUID ownerDoctorId = timeSlot.getAvailabilityWindow().getDoctor().getId();
+        return ownerDoctorId.equals(currentUser.getDoctor().getId());
+    }
+
+    private User getCurrentUser(Authentication authentication) {
+        String userEmail = (String) authentication.getPrincipal();
+        return userRepository.findByEmail(userEmail)
+                .orElseThrow(() -> new UsernameNotFoundException("User with email " + userEmail + " not found."));
     }
 }

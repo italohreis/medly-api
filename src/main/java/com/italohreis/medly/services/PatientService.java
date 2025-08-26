@@ -30,17 +30,17 @@ public class PatientService {
     private final PatientMapper patientMapper;
 
     @Transactional
-    public PatientResponseDTO createPatient(PatientRequestDTO patientRequestDTO) {
-        userService.checkIfEmailExists(patientRequestDTO.email());
+    public PatientResponseDTO createPatient(PatientRequestDTO dto) {
+        userService.checkIfEmailExists(dto.email());
 
         User user = userService.createUser(
-                patientRequestDTO.name(),
-                patientRequestDTO.email(),
-                patientRequestDTO.password(),
+                dto.name(),
+                dto.email(),
+                dto.password(),
                 Role.PATIENT
         );
 
-        Patient patient = patientMapper.toModel(patientRequestDTO);
+        Patient patient = patientMapper.toModel(dto);
 
         patient.setUser(user);
         user.setPatient(patient);
@@ -50,28 +50,28 @@ public class PatientService {
     }
 
     @Transactional
-    public PatientResponseDTO updatePatient(UUID id, PatientUpdateDTO patientUpdateDTO) {
+    public PatientResponseDTO updatePatient(UUID id, PatientUpdateDTO dto) {
         Patient patient = patientRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Patient", "id", id));
 
         User user = patient.getUser();
 
-        if (StringUtils.hasText(patientUpdateDTO.name())) {
-            user.setName(patientUpdateDTO.name());
-            patient.setName(patientUpdateDTO.name());
+        if (StringUtils.hasText(dto.name())) {
+            user.setName(dto.name());
+            patient.setName(dto.name());
         }
 
-        if (StringUtils.hasText(patientUpdateDTO.email()) && !patientUpdateDTO.email().equalsIgnoreCase(user.getEmail())) {
-            userService.checkIfEmailExists(patientUpdateDTO.email());
-            user.setEmail(patientUpdateDTO.email());
+        if (StringUtils.hasText(dto.email()) && !dto.email().equalsIgnoreCase(user.getEmail())) {
+            userService.checkIfEmailExists(dto.email());
+            user.setEmail(dto.email());
         }
 
-        if (StringUtils.hasText(patientUpdateDTO.cpf())) {
-            patient.setCpf(patientUpdateDTO.cpf());
+        if (StringUtils.hasText(dto.cpf())) {
+            patient.setCpf(dto.cpf());
         }
 
-        if (patientUpdateDTO.birthDate() != null) {
-            patient.setBirthDate(patientUpdateDTO.birthDate());
+        if (dto.birthDate() != null) {
+            patient.setBirthDate(dto.birthDate());
         }
 
         userRepository.save(user);

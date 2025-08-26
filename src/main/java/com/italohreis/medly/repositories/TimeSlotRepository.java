@@ -1,11 +1,10 @@
 package com.italohreis.medly.repositories;
 
-import com.italohreis.medly.models.Doctor;
+import com.italohreis.medly.models.TimeSlot;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 
-import java.util.Optional;
 import java.util.UUID;
 
-public interface DoctorRepository extends JpaRepository<Doctor, UUID>, JpaSpecificationExecutor<Doctor> {
+public interface TimeSlotRepository extends JpaRepository<TimeSlot, UUID>, JpaSpecificationExecutor<TimeSlot> {
 }

@@ -22,8 +22,8 @@ public class Appointment {
     private UUID id;
 
     @OneToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "availability_id", unique = true)
-    private Availability availability;
+    @JoinColumn(name = "time_slot_id", unique = true)
+    private TimeSlot timeSlot;
 
     @ManyToOne
     @JoinColumn(name = "doctor_id")

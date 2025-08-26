@@ -20,14 +20,14 @@ public class PatientController {
     private final PatientService patientService;
 
     @PostMapping
-    public ResponseEntity<PatientResponseDTO> createPatient(@RequestBody @Valid PatientRequestDTO patientRequestDTO) {
-        return ResponseEntity.status(HttpStatus.CREATED).body(patientService.createPatient(patientRequestDTO));
+    public ResponseEntity<PatientResponseDTO> createPatient(@RequestBody @Valid PatientRequestDTO dto) {
+        return ResponseEntity.status(HttpStatus.CREATED).body(patientService.createPatient(dto));
     }
 
     @PutMapping("/{id}")
     @PreAuthorize("@securityService.isPatientOwner(authentication, #id)")
     public ResponseEntity<PatientResponseDTO> updatePatient(@PathVariable("id") UUID id,
-                                                            @RequestBody @Valid PatientUpdateDTO patientUpdateDTO) {
-        return ResponseEntity.status(HttpStatus.OK).body(patientService.updatePatient(id, patientUpdateDTO));
+                                                            @RequestBody @Valid PatientUpdateDTO dto) {
+        return ResponseEntity.status(HttpStatus.OK).body(patientService.updatePatient(id, dto));
     }
 }
