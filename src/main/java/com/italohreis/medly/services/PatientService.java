@@ -84,16 +84,16 @@ public class PatientService {
     }
 
     public Page<PatientResponseDTO> getPatients(String name, String cpf, String email, Pageable pageable) {
-        Specification<Patient> spec = null;
+        Specification<Patient> spec = PatientSpec.isUserActive();
 
         if (name != null && !name.isBlank()) {
-            spec = addSpecification(spec, PatientSpec.hasName(name));
+            spec = spec.and(PatientSpec.hasName(name));
         }
         if (cpf != null && !cpf.isBlank()) {
-            spec = addSpecification(spec, PatientSpec.hasCpf(cpf));
+            spec = spec.and(PatientSpec.hasCpf(cpf));
         }
         if (email != null && !email.isBlank()) {
-            spec = addSpecification(spec, PatientSpec.hasEmail(email));
+            spec = spec.and(PatientSpec.hasEmail(email));
         }
 
         return patientRepository.findAll(spec, pageable)
@@ -107,7 +107,11 @@ public class PatientService {
         return patientMapper.toDto(patient);
     }
 
-    private Specification<Patient> addSpecification(Specification<Patient> base, Specification<Patient> newSpec) {
-        return (base == null) ? newSpec : base.and(newSpec);
+    @Transactional
+    public void deletePatient(UUID patientId) {
+        Patient patient = patientRepository.findById(patientId)
+                .orElseThrow(() -> new ResourceNotFoundException("Patient", "id", patientId));
+
+        userRepository.softDeleteById(patient.getUser().getId());
     }
 }

@@ -15,7 +15,7 @@ public class UserService {
     private final PasswordEncoder passwordEncoder;
 
     public void checkIfEmailExists(String email) {
-        if (userRepository.findByEmail(email).isPresent()) {
+        if (userRepository.findByEmailAndActiveTrue(email).isPresent()) {
             throw new EmailAlreadyExistsException(email);
         }
     }

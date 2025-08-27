@@ -19,7 +19,7 @@ public class AuthService {
     private final JwtTokenProvider jwtTokenProvider;
 
     public AuthResponseDTO login(AuthRequestDTO dto) {
-        User user = userRepository.findByEmail(dto.email())
+        User user = userRepository.findByEmailAndActiveTrue(dto.email())
                 .orElseThrow(() -> new ResourceNotFoundException("User", "email", dto.email()));
 
         if (!passwordEncoder.matches(dto.password(), user.getPassword())) {

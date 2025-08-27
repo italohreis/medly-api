@@ -87,7 +87,7 @@ public class SecurityService {
 
     private User getCurrentUser(Authentication authentication) {
         String userEmail = (String) authentication.getPrincipal();
-        return userRepository.findByEmail(userEmail)
+        return userRepository.findByEmailAndActiveTrue(userEmail)
                 .orElseThrow(() -> new UsernameNotFoundException("User with email " + userEmail + " not found."));
     }
 }

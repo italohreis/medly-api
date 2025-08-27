@@ -13,7 +13,6 @@ public class PatientSpec {
     }
 
     public static Specification<Patient> hasCpf(String cpf) {
-        // Geralmente CPF é uma busca exata, removendo pontuação
         String cleanedCpf = cpf.replaceAll("[^0-9]", "");
         return (root, query, cb) -> cb.equal(root.get("cpf"), cleanedCpf);
     }
@@ -22,6 +21,13 @@ public class PatientSpec {
         return (root, query, cb) -> {
             Join<Patient, User> userJoin = root.join("user");
             return cb.like(cb.lower(userJoin.get("email")), "%" + email.toLowerCase() + "%");
+        };
+    }
+
+    public static Specification<Patient> isUserActive() {
+        return (root, query, cb) -> {
+            Join<Patient, User> userJoin = root.join("user");
+            return cb.isTrue(userJoin.get("active"));
         };
     }
 }

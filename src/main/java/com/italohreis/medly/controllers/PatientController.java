@@ -49,4 +49,10 @@ public class PatientController {
         return ResponseEntity.status(HttpStatus.OK).body(patientService.getPatientById(id));
     }
 
+    @DeleteMapping("/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void deletePatient(@PathVariable UUID id) {
+        patientService.deletePatient(id);
+    }
 }
