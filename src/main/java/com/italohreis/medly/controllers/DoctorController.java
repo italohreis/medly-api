@@ -44,4 +44,10 @@ public class DoctorController {
 
         return ResponseEntity.status(HttpStatus.OK).body(doctorService.getDoctors(name, specialty, crm, pageable));
     }
+
+    @GetMapping("/{id}")
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<DoctorResponseDTO> getDoctorById(@PathVariable UUID id) {
+        return ResponseEntity.status(HttpStatus.OK).body(doctorService.getDoctorById(id));
+    }
 }

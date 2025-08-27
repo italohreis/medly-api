@@ -103,4 +103,10 @@ public class DoctorService {
         return doctorRepository.findAll(spec, pageable)
                 .map(doctorMapper::toDto);
     }
+
+    public DoctorResponseDTO getDoctorById(UUID id) {
+        Doctor doctor = doctorRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Doctor", "id", id));
+        return doctorMapper.toDto(doctor);
+    }
 }
