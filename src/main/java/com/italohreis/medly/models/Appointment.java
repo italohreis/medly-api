@@ -6,6 +6,8 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.hibernate.annotations.SQLDelete;
+import org.hibernate.annotations.Where;
 
 import java.time.LocalDateTime;
 import java.util.UUID;
@@ -16,6 +18,8 @@ import java.util.UUID;
 @Setter
 @Table(name = "appointment")
 @Entity
+@SQLDelete(sql = "UPDATE appointment SET deleted = true WHERE id = ?")
+@Where(clause = "deleted = false")
 public class Appointment {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
@@ -35,5 +39,9 @@ public class Appointment {
 
     @Enumerated(EnumType.STRING)
     private AppointmentStatus status;
+
+
+    @Column(nullable = false)
+    private boolean deleted = false;
 
 }

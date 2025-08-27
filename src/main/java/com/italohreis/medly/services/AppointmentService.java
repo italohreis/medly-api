@@ -137,4 +137,16 @@ public class AppointmentService {
 
         return appointmentMapper.toDto(appointment);
     }
+
+    public void deleteAppointment(UUID appointmentId) {
+        Appointment appointment = appointmentRepository.findById(appointmentId)
+                .orElseThrow(() -> new ResourceNotFoundException("Appointment", "id", appointmentId));
+
+        if (appointment.getStatus() == AppointmentStatus.COMPLETED) {
+            throw new BusinessRuleException("Cannot delete an appointment that has already been completed. It is part of the patient's history.");
+        }
+
+        appointmentRepository.delete(appointment);
+
+    }
 }

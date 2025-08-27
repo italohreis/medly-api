@@ -68,4 +68,11 @@ public class AppointmentController {
                 appointmentService.completeAppointment(id)
         );
     }
+
+    @DeleteMapping("/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void deleteAppointment(@PathVariable UUID id) {
+        appointmentService.deleteAppointment(id);
+    }
 }
