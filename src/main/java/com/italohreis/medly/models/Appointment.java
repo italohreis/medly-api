@@ -18,8 +18,6 @@ import java.util.UUID;
 @Setter
 @Table(name = "appointment")
 @Entity
-@SQLDelete(sql = "UPDATE appointment SET deleted = true WHERE id = ?")
-@Where(clause = "deleted = false")
 public class Appointment {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)

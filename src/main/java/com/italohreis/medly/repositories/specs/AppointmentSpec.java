@@ -29,4 +29,8 @@ public class AppointmentSpec {
                         endDateTime
                 );
     }
+
+    public static Specification<Appointment> isNotDeleted() {
+        return (root, query, cb) -> cb.equal(root.get("deleted"), false);
+    }
 }

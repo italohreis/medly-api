@@ -61,7 +61,7 @@ public class AppointmentService {
         User currentUser = userRepository.findByEmail(authentication.getName())
                 .orElseThrow(() -> new ResourceNotFoundException("User", "email", authentication.getName()));
 
-        Specification<Appointment> spec = null;
+        Specification<Appointment> spec = AppointmentSpec.isNotDeleted();
 
         if (currentUser.getRole() == Role.PATIENT) {
             spec = AppointmentSpec.hasPatientId(currentUser.getPatient().getId());
@@ -76,13 +76,13 @@ public class AppointmentService {
             }
             if (patientId != null) {
                 Specification<Appointment> patientSpec = AppointmentSpec.hasPatientId(patientId);
-                spec = (spec == null) ? patientSpec : spec.and(patientSpec);
+                spec = spec.and(patientSpec);
             }
         }
 
         if (startDate != null && endDate != null) {
             Specification<Appointment> dateSpec = AppointmentSpec.isBetweenDates(startDate, endDate);
-            spec = (spec == null) ? dateSpec : spec.and(dateSpec);
+            spec = spec.and(dateSpec);
         }
 
         return appointmentRepository.findAll(spec, pageable)
@@ -138,6 +138,7 @@ public class AppointmentService {
         return appointmentMapper.toDto(appointment);
     }
 
+    @Transactional
     public void deleteAppointment(UUID appointmentId) {
         Appointment appointment = appointmentRepository.findById(appointmentId)
                 .orElseThrow(() -> new ResourceNotFoundException("Appointment", "id", appointmentId));
@@ -146,7 +147,6 @@ public class AppointmentService {
             throw new BusinessRuleException("Cannot delete an appointment that has already been completed. It is part of the patient's history.");
         }
 
-        appointmentRepository.delete(appointment);
-
+        appointmentRepository.softDeleteById(appointmentId);
     }
 }
