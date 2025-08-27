@@ -65,4 +65,11 @@ public class ScheduleController {
         return ResponseEntity.status(HttpStatus.OK).body(
                 availabilityWindowService.updateTimeSlotStatus(id, dto));
     }
+
+    @DeleteMapping("/windows/{id}")
+    @PreAuthorize("hasRole('ADMIN') or @securityService.isDoctorOwnerOfAvailabilityWindow(authentication, #id)")
+    public ResponseEntity<Void> deleteAvailabilityWindow(@PathVariable UUID id) {
+        availabilityWindowService.deleteAvailabilityWindow(id);
+        return ResponseEntity.noContent().build();
+    }
 }
