@@ -11,9 +11,13 @@ import com.italohreis.medly.models.Patient;
 import com.italohreis.medly.models.User;
 import com.italohreis.medly.repositories.PatientRepository;
 import com.italohreis.medly.repositories.UserRepository;
+import com.italohreis.medly.repositories.specs.PatientSpec;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
@@ -77,5 +81,33 @@ public class PatientService {
         userRepository.save(user);
 
         return patientMapper.toDto(patient);
+    }
+
+    public Page<PatientResponseDTO> getPatients(String name, String cpf, String email, Pageable pageable) {
+        Specification<Patient> spec = null;
+
+        if (name != null && !name.isBlank()) {
+            spec = addSpecification(spec, PatientSpec.hasName(name));
+        }
+        if (cpf != null && !cpf.isBlank()) {
+            spec = addSpecification(spec, PatientSpec.hasCpf(cpf));
+        }
+        if (email != null && !email.isBlank()) {
+            spec = addSpecification(spec, PatientSpec.hasEmail(email));
+        }
+
+        return patientRepository.findAll(spec, pageable)
+                .map(patientMapper::toDto);
+    }
+
+    public PatientResponseDTO getPatientById(UUID id) {
+        Patient patient = patientRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Patient", "id", id));
+
+        return patientMapper.toDto(patient);
+    }
+
+    private Specification<Patient> addSpecification(Specification<Patient> base, Specification<Patient> newSpec) {
+        return (base == null) ? newSpec : base.and(newSpec);
     }
 }
