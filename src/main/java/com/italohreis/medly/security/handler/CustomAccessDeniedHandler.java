@@ -1,4 +1,4 @@
-package com.italohreis.medly.security;
+package com.italohreis.medly.security.handler;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.ServletException;

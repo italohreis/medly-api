@@ -1,4 +1,4 @@
-package com.italohreis.medly.security;
+package com.italohreis.medly.security.service;
 
 import com.italohreis.medly.exceptions.ResourceNotFoundException;
 import com.italohreis.medly.models.Appointment;
@@ -86,8 +86,8 @@ public class SecurityService {
     }
 
     private User getCurrentUser(Authentication authentication) {
-        String userEmail = (String) authentication.getPrincipal();
+        String userEmail = authentication.getName();
         return userRepository.findByEmailAndActiveTrue(userEmail)
-                .orElseThrow(() -> new UsernameNotFoundException("User with email " + userEmail + " not found."));
+                .orElseThrow(() -> new UsernameNotFoundException("User not found with email: " + userEmail));
     }
 }

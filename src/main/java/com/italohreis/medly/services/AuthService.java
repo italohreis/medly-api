@@ -6,7 +6,7 @@ import com.italohreis.medly.exceptions.InvalidCredentialsException;
 import com.italohreis.medly.exceptions.ResourceNotFoundException;
 import com.italohreis.medly.models.User;
 import com.italohreis.medly.repositories.UserRepository;
-import com.italohreis.medly.security.JwtTokenProvider;
+import com.italohreis.medly.security.config.JwtTokenProvider;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;

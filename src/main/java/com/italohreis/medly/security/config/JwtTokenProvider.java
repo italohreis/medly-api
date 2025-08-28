@@ -1,4 +1,4 @@
-package com.italohreis.medly.security;
+package com.italohreis.medly.security.config;
 
 import com.italohreis.medly.models.User;
 import io.jsonwebtoken.Claims;
