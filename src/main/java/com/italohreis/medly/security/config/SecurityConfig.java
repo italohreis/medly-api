@@ -1,5 +1,8 @@
-package com.italohreis.medly.security;
+package com.italohreis.medly.security.config;
 
+import com.italohreis.medly.security.handler.CustomAccessDeniedHandler;
+import com.italohreis.medly.security.handler.JwtAuthenticationEntryPoint;
+import com.italohreis.medly.security.filter.SecurityFilter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -22,6 +25,8 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 public class SecurityConfig {
 
     private final SecurityFilter securityFilter;
+    private final JwtAuthenticationEntryPoint jwtAuthenticationEntryPoint;
+    private final CustomAccessDeniedHandler customAccessDeniedHandler;
 
     @Bean
     public PasswordEncoder passwordEncoder() {
@@ -41,13 +46,20 @@ public class SecurityConfig {
                 .authorizeHttpRequests(authorize -> authorize
                         .requestMatchers(HttpMethod.POST, "/auth/login").permitAll()
                         .requestMatchers(HttpMethod.POST, "/patients").permitAll()
-                        .requestMatchers(HttpMethod.GET, "/schedule/timeslots/search").permitAll()
-                        .requestMatchers(HttpMethod.POST, "/doctors").hasRole("ADMIN")
-                        .requestMatchers(HttpMethod.PUT, "/doctors/{id}").hasAnyRole("ADMIN", "DOCTOR")
-                        .requestMatchers(HttpMethod.GET, "/doctors/**").authenticated()
-                        .requestMatchers("/schedule/**").hasAnyRole("ADMIN", "DOCTOR")
-                        .requestMatchers(HttpMethod.POST, "/appointments").hasAnyRole("ADMIN", "DOCTOR", "PATIENT")
+                        .requestMatchers(
+                                "/v3/api-docs/**",
+                                "/swagger-ui/**",
+                                "/swagger-ui.html",
+                                "/swagger-resources/**",
+                                "/webjars/**",
+                                "/configuration/ui",
+                                "/configuration/security"
+                        ).permitAll()
                         .anyRequest().authenticated()
+                )
+                .exceptionHandling(exception -> exception
+                        .authenticationEntryPoint(jwtAuthenticationEntryPoint)
+                        .accessDeniedHandler(customAccessDeniedHandler)
                 )
                 .addFilterBefore(securityFilter, UsernamePasswordAuthenticationFilter.class)
                 .build();

@@ -4,6 +4,7 @@ import com.italohreis.medly.dtos.availabilityWindow.AvailabilityWindowRequestDTO
 import com.italohreis.medly.dtos.availabilityWindow.AvailabilityWindowResponseDTO;
 import com.italohreis.medly.dtos.timeslot.TimeSlotResponseDTO;
 import com.italohreis.medly.dtos.timeslot.TimeSlotStatusUpdateDTO;
+import com.italohreis.medly.enums.AppointmentStatus;
 import com.italohreis.medly.enums.AvailabilityStatus;
 import com.italohreis.medly.enums.Specialty;
 import com.italohreis.medly.exceptions.BusinessRuleException;
@@ -142,5 +143,22 @@ public class AvailabilityWindowService {
         timeSlot.setStatus(dto.status());
 
         return timeSlotMapper.toDto(timeSlotRepository.save(timeSlot));
+    }
+
+    @Transactional
+    public void deleteAvailabilityWindow(UUID windowId) {
+        AvailabilityWindow window = availabilityWindowRepository.findById(windowId)
+                .orElseThrow(() -> new ResourceNotFoundException("Window", "id", windowId));
+
+        boolean hasActiveAppointments = window.getTimeSlots().stream()
+                .anyMatch(slot -> slot.getAppointment() != null &&
+                        slot.getAppointment().getStatus() != AppointmentStatus.CANCELLED &&
+                        slot.getAppointment().getStatus() != AppointmentStatus.COMPLETED);
+
+        if (hasActiveAppointments) {
+            throw new BusinessRuleException("Cannot delete an availability window that has active appointments.");
+        }
+
+        availabilityWindowRepository.delete(window);
     }
 }

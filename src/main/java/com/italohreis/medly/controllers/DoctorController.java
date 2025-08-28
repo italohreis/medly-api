@@ -44,4 +44,17 @@ public class DoctorController {
 
         return ResponseEntity.status(HttpStatus.OK).body(doctorService.getDoctors(name, specialty, crm, pageable));
     }
+
+    @GetMapping("/{id}")
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<DoctorResponseDTO> getDoctorById(@PathVariable UUID id) {
+        return ResponseEntity.status(HttpStatus.OK).body(doctorService.getDoctorById(id));
+    }
+
+    @DeleteMapping("/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void deleteDoctor(@PathVariable UUID id) {
+        doctorService.deleteDoctor(id);
+    }
 }

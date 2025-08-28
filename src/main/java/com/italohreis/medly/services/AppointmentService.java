@@ -61,7 +61,7 @@ public class AppointmentService {
         User currentUser = userRepository.findByEmail(authentication.getName())
                 .orElseThrow(() -> new ResourceNotFoundException("User", "email", authentication.getName()));
 
-        Specification<Appointment> spec = null;
+        Specification<Appointment> spec = AppointmentSpec.isNotDeleted();
 
         if (currentUser.getRole() == Role.PATIENT) {
             spec = AppointmentSpec.hasPatientId(currentUser.getPatient().getId());
@@ -76,13 +76,13 @@ public class AppointmentService {
             }
             if (patientId != null) {
                 Specification<Appointment> patientSpec = AppointmentSpec.hasPatientId(patientId);
-                spec = (spec == null) ? patientSpec : spec.and(patientSpec);
+                spec = spec.and(patientSpec);
             }
         }
 
         if (startDate != null && endDate != null) {
             Specification<Appointment> dateSpec = AppointmentSpec.isBetweenDates(startDate, endDate);
-            spec = (spec == null) ? dateSpec : spec.and(dateSpec);
+            spec = spec.and(dateSpec);
         }
 
         return appointmentRepository.findAll(spec, pageable)
@@ -117,19 +117,36 @@ public class AppointmentService {
         return appointmentMapper.toDto(appointmentRepository.save(appointment));
     }
 
+    @Transactional
     public AppointmentResponseDTO completeAppointment(UUID appointmentId) {
         Appointment appointment = appointmentRepository.findById(appointmentId)
                 .orElseThrow(() -> new ResourceNotFoundException("Appointment", "id", appointmentId));
 
         AppointmentStatus currentStatus = appointment.getStatus();
         if (currentStatus == AppointmentStatus.CANCELLED ||
-            currentStatus == AppointmentStatus.COMPLETED) {
+                currentStatus == AppointmentStatus.COMPLETED) {
             throw new BusinessRuleException(
                     "Appointment cannot be completed because its status is " + currentStatus.name().toLowerCase()
             );
         }
+
         appointment.setStatus(AppointmentStatus.COMPLETED);
 
-        return appointmentMapper.toDto(appointmentRepository.save(appointment));
+        TimeSlot timeSlot = appointment.getTimeSlot();
+        timeSlot.setStatus(AvailabilityStatus.COMPLETED);
+
+        return appointmentMapper.toDto(appointment);
+    }
+
+    @Transactional
+    public void deleteAppointment(UUID appointmentId) {
+        Appointment appointment = appointmentRepository.findById(appointmentId)
+                .orElseThrow(() -> new ResourceNotFoundException("Appointment", "id", appointmentId));
+
+        if (appointment.getStatus() == AppointmentStatus.COMPLETED) {
+            throw new BusinessRuleException("Cannot delete an appointment that has already been completed. It is part of the patient's history.");
+        }
+
+        appointmentRepository.softDeleteById(appointmentId);
     }
 }

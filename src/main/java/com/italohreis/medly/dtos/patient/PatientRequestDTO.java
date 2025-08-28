@@ -9,7 +9,7 @@ public record PatientRequestDTO(
         String name,
 
         @NotBlank(message = "Email is required")
-        @Email(message = "Email should be valid", regexp = "^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}$")
+        @Email(message = "Email should be valid")
         String email,
 
         @NotBlank(message = "Password is required")

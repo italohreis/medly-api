@@ -88,19 +88,33 @@ public class DoctorService {
             }
         }
 
-        Specification<Doctor> spec = null;
+        Specification<Doctor> spec = DoctorSpec.isUserActive();
 
         if (name != null && !name.isBlank()) {
             spec = DoctorSpec.hasName(name);
         }
         if (crm != null && !crm.isBlank()) {
-            spec = (spec == null) ? DoctorSpec.hasCrm(crm) : spec.and(DoctorSpec.hasCrm(crm));
+            spec = spec.and(DoctorSpec.hasCrm(crm));
         }
         if (specialityEnum != null) {
-            spec = (spec == null) ? DoctorSpec.hasSpecialty(specialityEnum) : spec.and(DoctorSpec.hasSpecialty(specialityEnum));
+            spec = spec.and(DoctorSpec.hasSpecialty(specialityEnum));
         }
 
         return doctorRepository.findAll(spec, pageable)
                 .map(doctorMapper::toDto);
+    }
+
+    public DoctorResponseDTO getDoctorById(UUID id) {
+        Doctor doctor = doctorRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Doctor", "id", id));
+        return doctorMapper.toDto(doctor);
+    }
+
+    @Transactional
+    public void deleteDoctor(UUID doctorId) {
+        Doctor doctor = doctorRepository.findById(doctorId)
+                .orElseThrow(() -> new ResourceNotFoundException("Doctor", "id", doctorId));
+
+        userRepository.softDeleteById(doctor.getUser().getId());
     }
 }
