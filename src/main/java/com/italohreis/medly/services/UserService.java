@@ -1,10 +1,14 @@
 package com.italohreis.medly.services;
 
+import com.italohreis.medly.dtos.user.UserProfileResponseDTO;
 import com.italohreis.medly.enums.Role;
 import com.italohreis.medly.exceptions.EmailAlreadyExistsException;
+import com.italohreis.medly.mappers.UserMapper;
 import com.italohreis.medly.models.User;
 import com.italohreis.medly.repositories.UserRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -12,7 +16,17 @@ import org.springframework.stereotype.Service;
 @RequiredArgsConstructor
 public class UserService {
     private final UserRepository userRepository;
+    private final UserMapper userMapper;
     private final PasswordEncoder passwordEncoder;
+
+    public UserProfileResponseDTO getUserProfile(Authentication authentication) {
+        String userEmail = (String) authentication.getPrincipal();
+
+        User currentUser = userRepository.findByEmailAndActiveTrue(userEmail)
+                .orElseThrow(() -> new UsernameNotFoundException("User not found"));
+
+        return userMapper.toProfileDto(currentUser);
+    }
 
     public void checkIfEmailExists(String email) {
         if (userRepository.findByEmailAndActiveTrue(email).isPresent()) {
