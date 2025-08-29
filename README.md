@@ -92,6 +92,8 @@ Medly é um back-end robusto que fornece toda a infraestrutura para uma platafor
     -   **API Medly:** `http://localhost:8080`
 
     -   **Banco de Dados PostgreSQL:** `localhost:5432`
+    
+    - Documentação Interativa (Swagger UI): http://localhost:8080/swagger-ui.html
 
 
 ----------
