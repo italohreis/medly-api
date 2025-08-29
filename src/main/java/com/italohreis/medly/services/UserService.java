@@ -11,6 +11,7 @@ import com.italohreis.medly.repositories.UserRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -23,7 +24,8 @@ public class UserService {
     private final PasswordEncoder passwordEncoder;
 
     public UserProfileResponseDTO getUserProfile(Authentication authentication) {
-        String userEmail = (String) authentication.getPrincipal();
+        UserDetails userDetails = (UserDetails) authentication.getPrincipal();
+        String userEmail = userDetails.getUsername();
 
         User currentUser = userRepository.findByEmailAndActiveTrue(userEmail)
                 .orElseThrow(() -> new UsernameNotFoundException("User not found"));
@@ -53,7 +55,8 @@ public class UserService {
             throw new BusinessRuleException("New password and confirmation password do not match.");
         }
 
-        String userEmail = (String) authentication.getPrincipal();
+        UserDetails userDetails = (UserDetails) authentication.getPrincipal();
+        String userEmail = userDetails.getUsername();
         User currentUser = userRepository.findByEmailAndActiveTrue(userEmail)
                 .orElseThrow(() -> new UsernameNotFoundException("User not found"));
 
