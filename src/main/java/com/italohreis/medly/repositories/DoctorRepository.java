@@ -8,4 +8,5 @@ import java.util.Optional;
 import java.util.UUID;
 
 public interface DoctorRepository extends JpaRepository<Doctor, UUID>, JpaSpecificationExecutor<Doctor> {
+    boolean existsByCrm(String crm);
 }
