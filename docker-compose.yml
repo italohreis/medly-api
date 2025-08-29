@@ -1,0 +1,41 @@
+services:
+  app:
+    build: .
+    container_name: medly-api
+    ports:
+      - "8080:8080"
+    environment:
+      - SPRING_DATASOURCE_URL=${DB_URL}
+      - SPRING_DATASOURCE_USERNAME=${POSTGRES_USER}
+      - SPRING_DATASOURCE_PASSWORD=${POSTGRES_PASSWORD}
+      - JWT_SECRET=${JWT_SECRET}
+    depends_on:
+      db:
+        condition: service_healthy
+    networks:
+      - medly_network
+
+  db:
+    image: postgres:15
+    container_name: medly-db
+    restart: always
+    environment:
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+      - POSTGRES_DB=${POSTGRES_DB}
+    volumes:
+      - medly_postgres_data:/var/lib/postgresql/data
+    networks:
+      - medly_network
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+
+volumes:
+  medly_postgres_data:
+
+networks:
+  medly_network:

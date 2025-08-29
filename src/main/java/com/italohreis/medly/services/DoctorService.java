@@ -35,6 +35,10 @@ public class DoctorService {
     public DoctorResponseDTO createDoctor(DoctorRequestDTO dto) {
         userService.checkIfEmailExists(dto.email());
 
+        if (doctorRepository.existsByCrm(dto.crm())) {
+            throw new BusinessRuleException("CRM already in use: " + dto.crm());
+        }
+
         User user = userService.createUser(
                 dto.name(),
                 dto.email(),

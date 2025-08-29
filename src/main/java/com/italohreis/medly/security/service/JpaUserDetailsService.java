@@ -1,5 +1,6 @@
 package com.italohreis.medly.security.service;
 
+import com.italohreis.medly.models.User;
 import com.italohreis.medly.repositories.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -15,7 +16,14 @@ public class JpaUserDetailsService implements UserDetailsService {
 
     @Override
     public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
-        return userRepository.findByEmailAndActiveTrue(email)
+        User user = userRepository.findByEmailAndActiveTrue(email)
                 .orElseThrow(() -> new UsernameNotFoundException("User not found with email: " + email));
+
+        return org.springframework.security.core.userdetails.User.builder()
+                .username(user.getEmail())
+                .password(user.getPassword())
+                .roles(user.getRole().name())
+                .disabled(!user.isActive())
+                .build();
     }
 }

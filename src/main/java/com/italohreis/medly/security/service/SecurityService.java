@@ -10,6 +10,7 @@ import com.italohreis.medly.repositories.TimeSlotRepository;
 import com.italohreis.medly.repositories.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
@@ -86,7 +87,17 @@ public class SecurityService {
     }
 
     private User getCurrentUser(Authentication authentication) {
-        String userEmail = authentication.getName();
+        Object principal = authentication.getPrincipal();
+        String userEmail;
+
+        if (principal instanceof UserDetails) {
+            userEmail = ((UserDetails) principal).getUsername();
+        } else if (principal instanceof String) {
+            userEmail = (String) principal;
+        } else {
+            throw new UsernameNotFoundException("Unable to extract username from authentication principal");
+        }
+
         return userRepository.findByEmailAndActiveTrue(userEmail)
                 .orElseThrow(() -> new UsernameNotFoundException("User not found with email: " + userEmail));
     }
