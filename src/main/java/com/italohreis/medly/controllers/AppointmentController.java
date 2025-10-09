@@ -1,12 +1,9 @@
 package com.italohreis.medly.controllers;
 
+import com.italohreis.medly.controllers.docs.AppointmentControllerDocs;
 import com.italohreis.medly.dtos.appointment.AppointmentRequestDTO;
 import com.italohreis.medly.dtos.appointment.AppointmentResponseDTO;
 import com.italohreis.medly.services.AppointmentService;
-import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.responses.ApiResponse;
-import io.swagger.v3.oas.annotations.responses.ApiResponses;
-import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -23,22 +20,10 @@ import java.util.UUID;
 @RestController
 @RequestMapping("/appointments")
 @RequiredArgsConstructor
-@Tag(name = "Appointments", description = "Endpoints for managing appointments")
-public class AppointmentController {
+public class AppointmentController implements AppointmentControllerDocs {
     private final AppointmentService appointmentService;
 
-    @Operation(
-            summary = "Create a new appointment",
-            description = "Creates a new appointment by linking a patient to an available TimeSlot. " +
-                    "Requires appropriate authentication and permissions."
-    )
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "201", description = "Appointment created successfully."),
-            @ApiResponse(responseCode = "400", description = "Invalid input data (e.g., null ID, incorrect format)."),
-            @ApiResponse(responseCode = "401", description = "Authentication failure (token is invalid or expired)."),
-            @ApiResponse(responseCode = "403", description = "Access denied (user does not have permission for this action)."),
-            @ApiResponse(responseCode = "404", description = "Resource not found (e.g., the provided patientId or timeSlotId does not exist).")
-    })
+    @Override
     @PostMapping
     @PreAuthorize(
             "hasRole('ADMIN') or " +
@@ -50,17 +35,7 @@ public class AppointmentController {
                 appointmentService.createAppointment(dto));
     }
 
-    @Operation(
-            summary = "List appointments with optional filters",
-            description = "Retrieves a paginated list of appointments, optionally filtered by patient ID, doctor ID, and date range. " +
-                    "Requires authentication."
-    )
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Appointments retrieved successfully."),
-            @ApiResponse(responseCode = "400", description = "Invalid input data (e.g., incorrect date format)."),
-            @ApiResponse(responseCode = "401", description = "Authentication failure (token is invalid or expired)."),
-            @ApiResponse(responseCode = "403", description = "Access denied (user does not have permission for this action).")
-    })
+    @Override
     @GetMapping
     @PreAuthorize("isAuthenticated()")
     public ResponseEntity<Page<AppointmentResponseDTO>> getAppointments(
@@ -74,17 +49,7 @@ public class AppointmentController {
                 appointmentService.listAppointments(doctorId, patientId, startDate, endDate, pageable));
     }
 
-    @Operation(
-            summary = "Get appointment details by ID",
-            description = "Retrieves detailed information about a specific appointment using its ID. " +
-                    "Requires appropriate authentication and permissions."
-    )
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Appointment details retrieved successfully."),
-            @ApiResponse(responseCode = "401", description = "Authentication failure (token is invalid or expired)."),
-            @ApiResponse(responseCode = "403", description = "Access denied (user does not have permission for this action)."),
-            @ApiResponse(responseCode = "404", description = "Resource not found (e.g., the provided appointment ID does not exist).")
-    })
+    @Override
     @GetMapping("/{id}")
     @PreAuthorize("hasRole('ADMIN') or @securityService.isUserPartOfAppointment(authentication, #id)")
     public ResponseEntity<AppointmentResponseDTO> getAppointmentById(@PathVariable UUID id) {
@@ -92,17 +57,7 @@ public class AppointmentController {
                 appointmentService.getAppointmentById(id));
     }
 
-    @Operation(
-            summary = "Cancel an appointment",
-            description = "Cancels an existing appointment by its ID. Requires appropriate authentication and permissions."
-    )
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Appointment cancelled successfully."),
-            @ApiResponse(responseCode = "401", description = "Authentication failure (token is invalid or expired)."),
-            @ApiResponse(responseCode = "403", description = "Access denied (user does not have permission for this action)."),
-            @ApiResponse(responseCode = "404", description = "Resource not found (e.g., the provided appointment ID does not exist)."),
-            @ApiResponse(responseCode = "400", description = "Invalid operation (e.g., trying to cancel an already completed appointment).")
-    })
+    @Override
     @PatchMapping("/{id}/cancel")
     @PreAuthorize("hasRole('ADMIN') or @securityService.isUserPartOfAppointment(authentication, #id)")
     public ResponseEntity<AppointmentResponseDTO> cancelAppointment(@PathVariable UUID id) {
@@ -111,17 +66,7 @@ public class AppointmentController {
         );
     }
 
-    @Operation(
-            summary = "Complete an appointment",
-            description = "Marks an existing appointment as completed by its ID. Requires appropriate authentication and permissions."
-    )
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Appointment completed successfully."),
-            @ApiResponse(responseCode = "401", description = "Authentication failure (token is invalid or expired)."),
-            @ApiResponse(responseCode = "403", description = "Access denied (user does not have permission for this action)."),
-            @ApiResponse(responseCode = "404", description = "Resource not found (e.g., the provided appointment ID does not exist)."),
-            @ApiResponse(responseCode = "400", description = "Invalid operation (e.g., trying to complete an already cancelled or completed appointment).")
-    })
+    @Override
     @PatchMapping("/{id}/complete")
     @PreAuthorize("hasRole('ADMIN') or @securityService.isDoctorOwnerOfAppointment(authentication, #id)")
     public ResponseEntity<AppointmentResponseDTO> completeAppointment(@PathVariable UUID id) {
@@ -130,17 +75,7 @@ public class AppointmentController {
         );
     }
 
-    @Operation(
-            summary = "Delete an appointment",
-            description = "Deletes an existing appointment by its ID. Only administrators can perform this action."
-    )
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "204", description = "Appointment deleted successfully."),
-            @ApiResponse(responseCode = "401", description = "Authentication failure (token is invalid or expired)."),
-            @ApiResponse(responseCode = "403", description = "Access denied (user does not have permission for this action)."),
-            @ApiResponse(responseCode = "404", description = "Resource not found (e.g., the provided appointment ID does not exist)."),
-            @ApiResponse(responseCode = "400", description = "Invalid operation (e.g., trying to delete an already completed appointment).")
-    })
+    @Override
     @DeleteMapping("/{id}")
     @PreAuthorize("hasRole('ADMIN')")
     @ResponseStatus(HttpStatus.NO_CONTENT)

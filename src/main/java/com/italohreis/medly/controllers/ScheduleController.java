@@ -1,14 +1,11 @@
 package com.italohreis.medly.controllers;
 
+import com.italohreis.medly.controllers.docs.ScheduleControllerDocs;
 import com.italohreis.medly.dtos.availabilityWindow.AvailabilityWindowRequestDTO;
 import com.italohreis.medly.dtos.availabilityWindow.AvailabilityWindowResponseDTO;
 import com.italohreis.medly.dtos.timeslot.TimeSlotResponseDTO;
 import com.italohreis.medly.dtos.timeslot.TimeSlotStatusUpdateDTO;
 import com.italohreis.medly.services.AvailabilityWindowService;
-import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.responses.ApiResponse;
-import io.swagger.v3.oas.annotations.responses.ApiResponses;
-import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -25,22 +22,10 @@ import java.util.UUID;
 @RestController
 @RequestMapping("/schedule")
 @RequiredArgsConstructor
-@Tag(name = "Schedule", description = "Endpoints for managing doctors availability and time slots")
-public class ScheduleController {
+public class ScheduleController implements ScheduleControllerDocs {
     private final AvailabilityWindowService availabilityWindowService;
 
-    @Operation(
-            summary = "Create a new availability window",
-            description = "Creates a new availability window for a doctor. Requires ADMIN role or ownership by the doctor."
-    )
-    @ApiResponses(value = {
-            @ApiResponse (responseCode = "201", description = "Availability window created successfully."),
-            @ApiResponse (responseCode = "400", description = "Invalid input data (e.g., null or empty fields, endTime before startTime)."),
-            @ApiResponse (responseCode = "401", description = "Authentication failure (token is invalid or expired)."),
-            @ApiResponse (responseCode = "403", description = "Access denied (user does not have permission for this action)."),
-            @ApiResponse (responseCode = "404", description = "Doctor not found with the provided ID."),
-            @ApiResponse (responseCode = "409", description = "Conflict (e.g., overlapping availability windows).")
-    })
+    @Override
     @PostMapping("/windows")
     @PreAuthorize("hasRole('ADMIN') or @securityService.isDoctorOwner(authentication, #dto.doctorId())")
     public ResponseEntity<AvailabilityWindowResponseDTO> createAvailabilityWindow(
@@ -50,18 +35,7 @@ public class ScheduleController {
                 availabilityWindowService.createAvailabilityWindow(dto));
     }
 
-    @Operation(
-            summary = "Get a doctor's schedule",
-            description = "Retrieves a paginated list of availability windows and their associated time slots for a specific doctor. " +
-                    "Requires ADMIN role or ownership by the doctor."
-    )
-    @ApiResponses(value = {
-            @ApiResponse (responseCode = "200", description = "Schedule retrieved successfully."),
-            @ApiResponse (responseCode = "400", description = "Invalid input data (e.g., null or empty doctorId)."),
-            @ApiResponse (responseCode = "401", description = "Authentication failure (token is invalid or expired)."),
-            @ApiResponse (responseCode = "403", description = "Access denied (user does not have permission for this action)."),
-            @ApiResponse (responseCode = "404", description = "Doctor not found with the provided ID.")
-    })
+    @Override
     @GetMapping("/windows")
     @PreAuthorize("hasRole('ADMIN') or @securityService.isDoctorOwner(authentication, #doctorId)")
     public ResponseEntity<Page<AvailabilityWindowResponseDTO>> getDoctorSchedule(
@@ -72,17 +46,7 @@ public class ScheduleController {
                 availabilityWindowService.getDoctorSchedule(doctorId, pageable));
     }
 
-    @Operation(
-            summary = "Search for available time slots",
-            description = "Searches for available time slots based on optional filters such as doctor ID, specialty, and date range. " +
-                    "Requires authentication."
-    )
-    @ApiResponses(value = {
-            @ApiResponse (responseCode = "200", description = "Available time slots retrieved successfully."),
-            @ApiResponse (responseCode = "400", description = "Invalid input data (e.g., incorrect date format, endDate before startDate)."),
-            @ApiResponse (responseCode = "401", description = "Authentication failure (token is invalid or expired)."),
-            @ApiResponse (responseCode = "403", description = "Access denied (user does not have permission for this action).")
-    })
+    @Override
     @GetMapping("/timeslots/search")
     @PreAuthorize("isAuthenticated()")
     public ResponseEntity<Page<TimeSlotResponseDTO>> searchAvailableTimeSlots(
@@ -96,18 +60,7 @@ public class ScheduleController {
                 availabilityWindowService.searchAvailableTimeSlots(doctorId, specialty, startDate, endDate, pageable));
     }
 
-    @Operation(
-            summary = "Update the status of a time slot",
-            description = "Updates the status of a specific time slot. Requires ADMIN role or ownership by the doctor."
-    )
-    @ApiResponses(value = {
-            @ApiResponse (responseCode = "200", description = "Time slot status updated successfully."),
-            @ApiResponse (responseCode = "400", description = "Invalid input data (e.g., null or empty fields)."),
-            @ApiResponse (responseCode = "400", description = "Invalid status transition (e.g., trying to set a time slot to BOOKED when it's already BOOKED etc.)."),
-            @ApiResponse (responseCode = "401", description = "Authentication failure (token is invalid or expired)."),
-            @ApiResponse (responseCode = "403", description = "Access denied (user does not have permission for this action)."),
-            @ApiResponse (responseCode = "404", description = "Time slot not found with the provided ID."),
-    })
+    @Override
     @PatchMapping("/timeslots/{id}")
     @PreAuthorize("hasRole('ADMIN') or @securityService.isDoctorOwnerOfTimeSlot(authentication, #id)")
     public ResponseEntity<TimeSlotResponseDTO> updateTimeSlotStatus(
@@ -118,17 +71,7 @@ public class ScheduleController {
                 availabilityWindowService.updateTimeSlotStatus(id, dto));
     }
 
-    @Operation(
-            summary = "Delete an availability window",
-            description = "Deletes an availability window by its ID. Requires ADMIN role or ownership by the doctor."
-    )
-    @ApiResponses(value = {
-            @ApiResponse (responseCode = "204", description = "Availability window deleted successfully."),
-            @ApiResponse (responseCode = "401", description = "Authentication failure (token is invalid or expired)."),
-            @ApiResponse (responseCode = "403", description = "Access denied (user does not have permission for this action)."),
-            @ApiResponse (responseCode = "404", description = "Availability window not found with the provided ID."),
-            @ApiResponse (responseCode = "400", description = "Invalid operation (e.g., trying to delete an availability window that has BOOKED time slots).")
-    })
+    @Override
     @DeleteMapping("/windows/{id}")
     @PreAuthorize("hasRole('ADMIN') or @securityService.isDoctorOwnerOfAvailabilityWindow(authentication, #id)")
     public ResponseEntity<Void> deleteAvailabilityWindow(@PathVariable UUID id) {
