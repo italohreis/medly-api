@@ -9,14 +9,14 @@ Medly é um back-end robusto que fornece toda a infraestrutura para uma platafor
 
 ## ✨ Principais Funcionalidades
 
-* 🔐 **Autenticação e Autorização:** Sistema de login seguro com Tokens JWT e controle de acesso granular baseado em perfis (`ADMIN`, `DOCTOR`, `PATIENT`).
-* 👨‍⚕️ **Gestão de Médicos:** CRUD completo para perfis de médicos, com busca por filtros e inativação (Soft Delete).
-* 👤 **Gestão de Pacientes:** CRUD completo para perfis de pacientes e auto-registro.
-* 🗓️ **Gestão de Agenda:** Médicos podem definir suas janelas de trabalho, e o sistema gera automaticamente os horários agendáveis (`TimeSlots`).
-* ✍️ **Ciclo de Vida de Agendamentos:** Fluxo completo de criar, listar, cancelar, concluir e deletar (Soft Delete) agendamentos.
-* 🔍 **Busca Avançada:** Endpoints de busca com múltiplos filtros e paginação para todos os principais recursos.
-* 🐳 **Pronto para Docker:** Configuração completa com `Dockerfile` e `docker-compose` para um ambiente de desenvolvimento e produção consistente.
-* 📚 **Documentação:** Documentação da API gerada automaticamente com Springdoc OpenAPI (Swagger UI).
+* **Autenticação e Autorização:** Sistema de login seguro com Tokens JWT e controle de acesso granular baseado em perfis (`ADMIN`, `DOCTOR`, `PATIENT`).
+* **Gestão de Médicos:** CRUD completo para perfis de médicos, com busca por filtros e inativação (Soft Delete).
+* **Gestão de Pacientes:** CRUD completo para perfis de pacientes e auto-registro.
+* **Gestão de Agenda:** Médicos podem definir suas janelas de trabalho, e o sistema gera automaticamente os horários agendáveis (`TimeSlots`).
+* **Ciclo de Vida de Agendamentos:** Fluxo completo de criar, listar, cancelar, concluir e deletar (Soft Delete) agendamentos.
+* **Busca Avançada:** Endpoints de busca com múltiplos filtros e paginação para todos os principais recursos.
+* **Pronto para Docker:** Configuração completa com `Dockerfile` e `docker-compose` para um ambiente de desenvolvimento e produção consistente.
+* **Documentação:** Documentação da API gerada automaticamente com Springdoc OpenAPI (Swagger UI).
 
 
 ## 🚀 Tecnologias Utilizadas
@@ -90,9 +90,7 @@ Medly é um back-end robusto que fornece toda a infraestrutura para uma platafor
 4.  **Pronto!** Após a inicialização, o ambiente estará disponível:
 
     -   **API Medly:** `http://localhost:8080`
-
-    -   **Banco de Dados PostgreSQL:** `localhost:5432`
-    
+ 
     - Documentação Interativa (Swagger UI): http://localhost:8080/swagger-ui.html
 
 
