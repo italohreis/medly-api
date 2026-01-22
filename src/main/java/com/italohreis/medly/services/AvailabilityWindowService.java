@@ -147,7 +147,7 @@ public class AvailabilityWindowService {
 
     @Transactional
     public void deleteAvailabilityWindow(UUID windowId) {
-        AvailabilityWindow window = availabilityWindowRepository.findById(windowId)
+        AvailabilityWindow window = availabilityWindowRepository.findByIdWithDoctor(windowId)
                 .orElseThrow(() -> new ResourceNotFoundException("Window", "id", windowId));
 
         boolean hasActiveAppointments = window.getTimeSlots().stream()
@@ -158,6 +158,12 @@ public class AvailabilityWindowService {
         if (hasActiveAppointments) {
             throw new BusinessRuleException("Cannot delete an availability window that has active appointments.");
         }
+
+        window.getTimeSlots().forEach(slot -> {
+            if (slot.getAppointment() != null) {
+                slot.getAppointment().setTimeSlot(null);
+            }
+        });
 
         availabilityWindowRepository.delete(window);
     }

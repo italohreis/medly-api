@@ -38,7 +38,7 @@ public class PatientController implements PatientControllerDocs {
 
     @Override
     @GetMapping
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasRole('ADMIN') or hasRole('DOCTOR')")
     public ResponseEntity<Page<PatientResponseDTO>> getPatients(
             @RequestParam(required = false) String name,
             @RequestParam(required = false) String cpf,
@@ -49,7 +49,7 @@ public class PatientController implements PatientControllerDocs {
 
     @Override
     @GetMapping("/{id}")
-    @PreAuthorize("hasRole('ADMIN') or @securityService.isPatientOwner(authentication, #id)")
+    @PreAuthorize("hasRole('ADMIN') or hasRole('DOCTOR') or @securityService.isPatientOwner(authentication, #id)")
     public ResponseEntity<PatientResponseDTO> getPatientById(@PathVariable UUID id) {
         return ResponseEntity.status(HttpStatus.OK).body(patientService.getPatientById(id));
     }
