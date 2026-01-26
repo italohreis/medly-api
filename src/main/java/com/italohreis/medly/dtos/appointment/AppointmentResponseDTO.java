@@ -27,7 +27,9 @@ public record AppointmentResponseDTO(
             @Schema(description = "Doctor's full name.")
             String name,
             @Schema(description = "Doctor's CRM number.")
-            String crm
+            String crm,
+            @Schema(description = "Doctor's medical specialty.")
+            String specialty
     ) {}
 
     @Schema(description = "Simplified patient information for the appointment")
