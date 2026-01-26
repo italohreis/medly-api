@@ -8,6 +8,8 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 
 @Entity
@@ -33,8 +35,8 @@ public class TimeSlot {
     @Column(nullable = false)
     private AvailabilityStatus status;
 
-    @OneToOne(mappedBy = "timeSlot")
-    private Appointment appointment;
+    @OneToMany(mappedBy = "timeSlot", fetch = FetchType.LAZY)
+    private List<Appointment> appointments = new ArrayList<>();
 
     @PrePersist
     public void prePersist() {

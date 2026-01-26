@@ -85,7 +85,7 @@ public class AvailabilityWindowService {
     }
 
     public Page<TimeSlotResponseDTO> searchAvailableTimeSlots(
-        UUID doctorId, String specialty, LocalDateTime startDate, LocalDateTime endDate, Pageable pageable) {
+            UUID doctorId, String specialty, LocalDateTime startDate, LocalDateTime endDate, Pageable pageable) {
         Specialty specialtyEnum = null;
         if (specialty != null && !specialty.isBlank()) {
             try {
@@ -151,17 +151,19 @@ public class AvailabilityWindowService {
                 .orElseThrow(() -> new ResourceNotFoundException("Window", "id", windowId));
 
         boolean hasActiveAppointments = window.getTimeSlots().stream()
-                .anyMatch(slot -> slot.getAppointment() != null &&
-                        slot.getAppointment().getStatus() != AppointmentStatus.CANCELLED &&
-                        slot.getAppointment().getStatus() != AppointmentStatus.COMPLETED);
+                .flatMap(slot -> slot.getAppointments().stream())
+                .anyMatch(appointment ->
+                        appointment.getStatus() != AppointmentStatus.CANCELLED &&
+                                appointment.getStatus() != AppointmentStatus.COMPLETED
+                );
 
         if (hasActiveAppointments) {
             throw new BusinessRuleException("Cannot delete an availability window that has active appointments.");
         }
 
         window.getTimeSlots().forEach(slot -> {
-            if (slot.getAppointment() != null) {
-                slot.getAppointment().setTimeSlot(null);
+            if (slot.getAppointments() != null) {
+                slot.getAppointments().forEach(appointment -> appointment.setTimeSlot(null));
             }
         });
 

@@ -50,7 +50,7 @@ CREATE TABLE appointment (
     deleted BOOLEAN NOT NULL DEFAULT false,
     doctor_id UUID NOT NULL,
     patient_id UUID NOT NULL,
-    time_slot_id UUID UNIQUE,
+    time_slot_id UUID,
     CONSTRAINT fk_appointment_to_doctor FOREIGN KEY (doctor_id) REFERENCES doctor(id),
     CONSTRAINT fk_appointment_to_patient FOREIGN KEY (patient_id) REFERENCES patient(id),
     CONSTRAINT fk_appointment_to_time_slot FOREIGN KEY (time_slot_id) REFERENCES time_slots(id)
