@@ -9,10 +9,14 @@ import org.springframework.data.repository.query.Param;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 public interface AvailabilityWindowRepository extends JpaRepository<AvailabilityWindow, UUID> {
     Page<AvailabilityWindow> findByDoctorId(UUID doctorId, Pageable pageable);
+
+    @Query("SELECT aw FROM AvailabilityWindow aw JOIN FETCH aw.doctor WHERE aw.id = :id")
+    Optional<AvailabilityWindow> findByIdWithDoctor(@Param("id") UUID id);
 
     @Query("SELECT aw FROM AvailabilityWindow aw WHERE aw.doctor.id = :doctorId AND aw.startTime < :newEndTime AND aw.endTime > :newStartTime")
     List<AvailabilityWindow> findOverlappingWindows(

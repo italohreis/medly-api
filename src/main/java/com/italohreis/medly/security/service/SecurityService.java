@@ -41,7 +41,7 @@ public class SecurityService {
             return false;
         }
 
-        return availabilityWindowRepository.findById(windowId)
+        return availabilityWindowRepository.findByIdWithDoctor(windowId)
                 .map(window -> window.getDoctor().getId().equals(currentUser.getDoctor().getId()))
                 .orElseThrow(() -> new ResourceNotFoundException("AvailabilityWindow", "id", windowId));
     }
